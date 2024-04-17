@@ -38,24 +38,6 @@
 		"category": "Electronics"
 	},
 	{
-		"title": "Plato 6",
-		"description": "Plato",
-		"price": 45,
-		"thumbnail": "Sin imagen",
-		"code": "plato1236",
-		"stock": 25,
-		"id": 6
-	},
-	{
-		"title": "Plato 7",
-		"description": "Plato",
-		"price": 45,
-		"thumbnail": "Sin imagen",
-		"code": "plato1237",
-		"stock": 25,
-		"id": 7
-	},
-	{
 		"title": "Plato 8",
 		"description": "Plato",
 		"price": 45,

@@ -12,6 +12,9 @@ router.get("/", async (req, res) => {
   const products = await manager.getProducts();
   // console.log(products);
 
+  const io = req.app.get("socketio");
+  io.emit("showProducts", await manager.getProducts());
+
   if (!products) {
     res.send({ status: "Error", payload: [] });
   }
@@ -26,17 +29,17 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:pid", async (req, res) => {
-  const id = +req.params.pid;
-  // console.log(id);
-  const product = await manager.getProductById(id);
+// router.get("/:pid", async (req, res) => {
+//   const id = +req.params.pid;
+//   // console.log(id);
+//   const product = await manager.getProductById(id);
 
-  if (product != null) {
-    res.send({ status: "success", payload: product });
-  } else {
-    res.send({ status: "error", message: "Error: No se encontro el producto" });
-  }
-});
+//   if (product != null) {
+//     res.send({ status: "success", payload: product });
+//   } else {
+//     res.send({ status: "error", message: "Error: No se encontro el producto" });
+//   }
+// });
 
 router.post("/", async (req, res) => {
   const product = req.body; //Obteniendo el objeto que vamos a insertar
@@ -75,22 +78,24 @@ router.post("/", async (req, res) => {
       status,
       category
     );
+    const io = req.app.get("socketio");
+    io.emit("showProducts", await manager.getProducts());
     res.status(201).send({ status: "success", message: "product created" });
   }
 });
 
-router.put("/:pid", async (req, res) => {
-  const productBody = req.body;
-  const pid = Number(req.params.pid);
+// router.put("/:pid", async (req, res) => {
+//   const productBody = req.body;
+//   const pid = Number(req.params.pid);
 
-  const msg = await manager.updateProduct(pid, productBody);
+//   const msg = await manager.updateProduct(pid, productBody);
 
-  if (msg) {
-    res.send({ status: "success", message: "product updated" });
-  } else {
-    res.status(404).send({ status: "error", error: "user not found" });
-  }
-});
+//   if (msg) {
+//     res.send({ status: "success", message: "product updated" });
+//   } else {
+//     res.status(404).send({ status: "error", error: "user not found" });
+//   }
+// });
 
 router.delete("/:pid", async (req, res) => {
   const pid = Number(req.params.pid);
@@ -98,6 +103,8 @@ router.delete("/:pid", async (req, res) => {
   const msg = await manager.deleteProduct(pid);
 
   if (msg) {
+    const io = req.app.get("socketio");
+    io.emit("showProducts", await manager.getProducts());
     res.send({ status: "success", message: "product deleted" });
   } else {
     res.status(404).send({ status: "error", error: "user not found" });
