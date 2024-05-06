@@ -1,52 +1,55 @@
 import { Router } from "express";
-import cartManager from "../manager/cart.manager.js";
-import __dirname from "../utils.js";
-import productManager from "../manager/product.manager.js";
+import Carts from "../dao/dbManagers/carts.manager.js";
 
 const router = Router();
-const productM = new productManager(`${__dirname}/files/products.json`);
+const cartsManager = new Carts();
 
-const manager = new cartManager(`${__dirname}/files/carts.json`);
+router.get("/", async (req, res) => {
+  try {
+    const carts = cartsManager.getAll();
+    res.send({ status: "success", payload: carts });
+  } catch (error) {
+    res.status(500).send({ status: "errror", message: error.message });
+  }
+});
 
 router.post("/", async (req, res) => {
-  const cart = await manager.addCart();
-  res.send({ status: "success", payload: cart });
-});
+  try {
+    const { products } = req.body;
+    if (!products) {
+      return res
+        .status(400)
+        .send({ status: "error", message: "incomplete data" });
+    }
 
-router.get("/:cid", async (req, res) => {
-  const id = +req.params.cid;
-  const cart = await manager.getCartById(id);
+    const result = await cartsManager.save({
+      products,
+    });
 
-  if (cart != null) {
-    res.send({ status: "success", payload: cart.products });
-  } else {
-    res.send({ status: "error", message: "Error: No se encontro el carrito" });
+    res.status(201).send({ status: "success", payload: result });
+  } catch (error) {
+    res.status(500).send({ status: "error", message: error.message });
   }
 });
 
-router.post("/:cid/product/:pid", async (req, res) => {
-  const cid = +req.params.cid;
-  const pid = +req.params.pid;
+router.put("/:cid", async (req, res) => {
+  try {
+    const { products } = req.body;
+    const { cid } = req.params;
+    if (!products) {
+      return res
+        .status(400)
+        .send({ status: "error", message: "incomplete data" });
+    }
 
-  const carts = await manager.getCarts();
-  const id = carts.findIndex((cart) => cart.id === cid);
-  const cartById = carts[id];
+    const result = await cartsManager.update(cid, {
+      products,
+    });
 
-  const indexProductInCart = cartById.products.findIndex(
-    (product) => product.id === pid
-  );
-
-  if (indexProductInCart != -1) {
-    cartById.products[indexProductInCart].quantity += 1;
-  } else {
-    const product = await productM.getProductById(pid);
-    product && cartById.products.push({ id: product.id, quantity: 1 });
+    res.send({ status: "success", payload: result });
+  } catch (error) {
+    res.status(500).send({ status: "error", message: error.message });
   }
-
-  carts[id] = cartById;
-
-  await manager.saveCart(carts);
-  res.send({ status: "success", payload: cartById });
 });
 
 export default router;

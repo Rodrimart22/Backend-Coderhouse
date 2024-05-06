@@ -1,113 +1,102 @@
 import { Router } from "express";
-import productManager from "../manager/product.manager.js";
-import __dirname from "../utils.js";
+import Products from "../dao/dbManagers/products.manager.js";
 
 const router = Router();
+const productsManager = new Products();
 
-const manager = new productManager(`${__dirname}/files/products.json`);
-
-//Obtener el listado de mascotas
 router.get("/", async (req, res) => {
-  const limit = req.query.limit;
-  const products = await manager.getProducts();
-  // console.log(products);
-
-  const io = req.app.get("socketio");
-  io.emit("showProducts", await manager.getProducts());
-
-  if (!products) {
-    res.send({ status: "Error", payload: [] });
-  }
-  if (limit == undefined) {
-    res.send({ status: "success", payload: products }); // send all products
-  } else {
-    const limitedProducts = products.slice(0, limit);
-    res.send({
-      status: "success",
-      payload: limitedProducts ? limitedProducts : [],
-    });
+  try {
+    const products = productsManager.getAll();
+    res.send({ status: "success", payload: products });
+  } catch (error) {
+    res.status(500).send({ status: "errror", message: error.message });
   }
 });
-
-// router.get("/:pid", async (req, res) => {
-//   const id = +req.params.pid;
-//   // console.log(id);
-//   const product = await manager.getProductById(id);
-
-//   if (product != null) {
-//     res.send({ status: "success", payload: product });
-//   } else {
-//     res.send({ status: "error", message: "Error: No se encontro el producto" });
-//   }
-// });
 
 router.post("/", async (req, res) => {
-  const product = req.body; //Obteniendo el objeto que vamos a insertar
-
-  const {
-    title,
-    description,
-    price,
-    thumbnail,
-    code,
-    stock,
-    status,
-    category,
-  } = product;
-
-  if (
-    !title ||
-    !description ||
-    !price ||
-    !status ||
-    !code ||
-    !stock ||
-    !category
-  ) {
-    return res
-      .status(400)
-      .send({ status: "error", message: "incomplete product data" });
-  } else {
-    await manager.addProduct(
+  try {
+    const {
       title,
       description,
-      price,
-      thumbnail,
       code,
-      stock,
+      price,
       status,
-      category
-    );
-    const io = req.app.get("socketio");
-    io.emit("showProducts", await manager.getProducts());
-    res.status(201).send({ status: "success", message: "product created" });
+      stock,
+      category,
+      thumbnails,
+    } = req.body;
+    if (
+      !title ||
+      !description ||
+      !code ||
+      !price ||
+      !status ||
+      !stock ||
+      !category
+    ) {
+      return res
+        .status(400)
+        .send({ status: "error", message: "incomplete data" });
+    }
+
+    const result = await productsManager.save({
+      title,
+      description,
+      code,
+      price,
+      status,
+      stock,
+      category,
+      thumbnails,
+    });
+
+    res.status(201).send({ status: "success", payload: result });
+  } catch (error) {
+    res.status(500).send({ status: "error", message: error.message });
   }
 });
 
-// router.put("/:pid", async (req, res) => {
-//   const productBody = req.body;
-//   const pid = Number(req.params.pid);
+router.put("/:pid", async (req, res) => {
+  try {
+    const {
+      title,
+      description,
+      code,
+      price,
+      status,
+      stock,
+      category,
+      thumbnails,
+    } = req.body;
+    const { pid } = req.params;
+    if (
+      !title ||
+      !description ||
+      !code ||
+      !price ||
+      !status ||
+      !stock ||
+      !category
+    ) {
+      return res
+        .status(400)
+        .send({ status: "error", message: "incomplete data" });
+    }
 
-//   const msg = await manager.updateProduct(pid, productBody);
+    const result = await productsManager.update(pid, {
+      title,
+      description,
+      code,
+      price,
+      status,
+      stock,
+      category,
+      thumbnails,
+    });
 
-//   if (msg) {
-//     res.send({ status: "success", message: "product updated" });
-//   } else {
-//     res.status(404).send({ status: "error", error: "user not found" });
-//   }
-// });
-
-router.delete("/:pid", async (req, res) => {
-  const pid = Number(req.params.pid);
-
-  const msg = await manager.deleteProduct(pid);
-
-  if (msg) {
-    const io = req.app.get("socketio");
-    io.emit("showProducts", await manager.getProducts());
-    res.send({ status: "success", message: "product deleted" });
-  } else {
-    res.status(404).send({ status: "error", error: "user not found" });
+    res.send({ status: "success", payload: result });
+  } catch (error) {
+    res.status(500).send({ status: "errror", message: error.message });
   }
 });
 

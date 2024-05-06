@@ -1,0 +1,98 @@
+[
+	{
+		"title": "producto prueba",
+		"description": "Este es un producto prueba",
+		"price": 55,
+		"thumbnail": "Sin imagen",
+		"code": "abd123",
+		"stock": 25,
+		"id": 1
+	},
+	{
+		"title": "Plato",
+		"description": "Plato de ceramica",
+		"price": 45,
+		"thumbnail": "Sin imagen",
+		"code": "plato12",
+		"stock": 25,
+		"id": 2
+	},
+	{
+		"title": "Plato 2",
+		"description": "Plato",
+		"price": 45,
+		"thumbnail": "Sin imagen",
+		"code": "plato1232",
+		"stock": 25,
+		"id": 4
+	},
+	{
+		"title": "Smartphone Xs",
+		"description": "A cutting-edge smartphone with advanced features.",
+		"price": 45,
+		"thumbnail": "Sin imagen",
+		"code": "plato1233",
+		"stock": 50,
+		"id": 5,
+		"status": "Available",
+		"category": "Electronics"
+	},
+	{
+		"title": "Plato 6",
+		"description": "Plato",
+		"price": 45,
+		"thumbnail": "Sin imagen",
+		"code": "plato1236",
+		"stock": 25,
+		"id": 6
+	},
+	{
+		"title": "Plato 7",
+		"description": "Plato",
+		"price": 45,
+		"thumbnail": "Sin imagen",
+		"code": "plato1237",
+		"stock": 25,
+		"id": 7
+	},
+	{
+		"title": "Plato 8",
+		"description": "Plato",
+		"price": 45,
+		"thumbnail": "Sin imagen",
+		"code": "plato1238",
+		"stock": 25,
+		"id": 8
+	},
+	{
+		"title": "Plato 9",
+		"description": "Plato",
+		"price": 45,
+		"thumbnail": "Sin imagen",
+		"code": "plato1239",
+		"stock": 25,
+		"id": 9
+	},
+	{
+		"title": "Plato 10",
+		"description": "Plato",
+		"price": 45,
+		"thumbnail": "Sin imagen",
+		"code": "plato12310",
+		"stock": 25,
+		"id": 10
+	},
+	{
+		"title": "Smartphone X",
+		"description": "A cutting-edge smartphone with advanced features.",
+		"price": 599.99,
+		"thumbnail": [
+			"smartphone_x.jpg"
+		],
+		"code": "ABC123",
+		"stock": 50,
+		"status": true,
+		"category": "Electronics",
+		"id": 11
+	}
+]

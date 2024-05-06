@@ -1,10 +1,15 @@
 import express from "express";
 import productsRouter from "./routes/products.router.js";
-import __dirname from "./utils.js";
-import viewsRouter from "./routes/web/views.router.js";
-import indexRouter from "./routes/web/index.router.js";
+import messagesRouter from "./routes/messages.router.js";
+import cartsRouter from "./routes/carts.router.js";
+import viewsRouter from "./routes/views.router.js";
 import handlebars from "express-handlebars";
+import mongoose from "mongoose";
+import __dirname from "./utils.js";
 import { Server } from "socket.io";
+import Messages from "./dao/dbManagers/messages.manager.js";
+
+const messagesManager = new Messages();
 
 const app = express();
 
@@ -14,28 +19,38 @@ app.use(express.urlencoded({ extended: true }));
 //Servidor archivos estáticos
 app.use(express.static(`${__dirname}/public`));
 
-//Motor de plantillas
 app.engine("handlebars", handlebars.engine());
 app.set("views", `${__dirname}/views`);
 app.set("view engine", "handlebars");
 
-//Routes
-app.use("/realtimeproducts", viewsRouter);
+app.use("/", viewsRouter);
 app.use("/api/products", productsRouter);
-app.use("/", indexRouter);
+app.use("/api/carts", cartsRouter);
+app.use("/api/messages", messagesRouter);
+
+try {
+  await mongoose.connect(
+    "mongodb+srv://martinezmondelli:j1mT8CP8yjC5Iy6z@cluster0.xax460v.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Cluster0"
+  );
+  console.log("DB connected");
+} catch (error) {
+  console.log(error.message);
+}
 
 const server = app.listen(8080, () => console.log("Server running"));
 
-//Socket io
-const io = new Server(server);
+// Socket io
+const socketServer = new Server(server);
 
-app.set("socketio", io);
-
-io.on("connection", (socket) => {
-  console.log("Nuevo usuario conectado");
-});
-
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send("Something went wrong!");
+socketServer.on("connection", (socket) => {
+  socket.on("addMessage", async (data) => {
+    try {
+      await messagesManager.save(data);
+      const messages = await messagesManager.getAll();
+      socketServer.emit("updateMessages", messages);
+      // console.log("Mensaje añadido", data);
+    } catch (error) {
+      console.error("Error adding message:", error.message);
+    }
+  });
 });
