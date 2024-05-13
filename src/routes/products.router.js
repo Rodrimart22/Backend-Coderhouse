@@ -4,15 +4,18 @@ import Products from "../dao/dbManagers/products.manager.js";
 const router = Router();
 const productsManager = new Products();
 
+// Get all products
 router.get("/", async (req, res) => {
   try {
-    const products = productsManager.getAll();
+    console.log("obteniendo productos");
+    const products = await productsManager.getAll();
     res.send({ status: "success", payload: products });
   } catch (error) {
-    res.status(500).send({ status: "errror", message: error.message });
+    res.status(500).send({ status: "error", message: error.message });
   }
 });
 
+// Create a new product
 router.post("/", async (req, res) => {
   try {
     const {
@@ -56,6 +59,7 @@ router.post("/", async (req, res) => {
   }
 });
 
+// Update a product data
 router.put("/:pid", async (req, res) => {
   try {
     const {

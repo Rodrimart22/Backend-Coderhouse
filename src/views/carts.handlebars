@@ -1,4 +1,13 @@
-{{#each carts}}
-    <p>{{this._id}}</p>
-    <p>{{this.products}}</p>
-{{/each}}
+<div>
+    <p>Renderizado: </p>
+    {{#each products}}
+        <div class="productData">
+            <h3>{{title}}</h3>
+            <p>Precio: ${{price}}</p>
+            <p>Unidades: {{stock}}</p>
+            <p>Categoria: {{category}}</p>
+            <p>Cantidad: {{quantity}}</p>
+            <button id="addButton" value="{{productId}}">Agregar al Carrito</button>
+        </div>
+    {{/each}}
+</div>
