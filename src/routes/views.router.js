@@ -6,7 +6,32 @@ const router = Router();
 
 const cartsManager = new Carts();
 
-router.get("/products", async (req, res) => {
+//Middleware para comprobacion de acceso
+const publicAccess = (req, res, next) => {
+  if(req.session?.user) return res.redirect('/products');
+  next();
+}
+
+const privateAccess = (req, res, next) => {
+  if(!req.session?.user) return res.redirect('/login');
+  next();
+}
+
+router.get('/register', publicAccess, (req, res) => {
+  res.render('register')
+});
+
+router.get('/login', publicAccess, (req, res) => {
+  res.render('login')
+});
+
+router.get('/', privateAccess, (req, res) => {
+  res.render('profile', {
+      user: req.session.user
+  })
+});
+
+router.get("/products",privateAccess , async (req, res) => {
   try {
     const { limit = 10, page = 1, sort, query } = req.query;
     const { docs, hasPrevPage, hasNextPage, nextPage, prevPage, totalPages } =
@@ -21,6 +46,7 @@ router.get("/products", async (req, res) => {
         prevPage,
         page,
         totalPages,
+        user: req.session.user
       })
       .send({
         status: "success",
