@@ -8,58 +8,57 @@ const cartsManager = new Carts();
 
 //Middleware para comprobacion de acceso
 const publicAccess = (req, res, next) => {
-  if(req.session?.user) return res.redirect('/products');
+  if (req.session?.user) return res.redirect("/products");
   next();
-}
+};
 
 const privateAccess = (req, res, next) => {
-  if(!req.session?.user) return res.redirect('/login');
+  if (!req.session?.user) return res.redirect("/login");
   next();
-}
+};
 
-router.get('/register', publicAccess, (req, res) => {
-  res.render('register')
+router.get("/register", publicAccess, (req, res) => {
+  res.render("register");
 });
 
-router.get('/login', publicAccess, (req, res) => {
-  res.render('login')
+router.get("/login", publicAccess, (req, res) => {
+  res.render("login");
 });
 
-router.get('/', privateAccess, (req, res) => {
-  res.render('profile', {
-      user: req.session.user
-  })
+router.get("/", privateAccess, (req, res) => {
+  res.render("profile", {
+    user: req.session.user,
+  });
 });
 
-router.get("/products",privateAccess , async (req, res) => {
+router.get("/products", privateAccess, async (req, res) => {
   try {
     const { limit = 10, page = 1, sort, query } = req.query;
     const { docs, hasPrevPage, hasNextPage, nextPage, prevPage, totalPages } =
       await productsModel.paginate({}, { limit, page, lean: true });
 
-    res
-      .render("products", {
-        products: docs,
-        hasPrevPage,
-        hasNextPage,
-        nextPage,
-        prevPage,
-        page,
-        totalPages,
-        user: req.session.user
-      })
-      .send({
-        status: "success",
-        payload: docs,
-        totalPages,
-        prevPage,
-        nextPage,
-        page,
-        hasPrevPage,
-        hasNextPage,
-        prevLink: `/products-view?page=${prevPage}`,
-        nextLink: `/products-view?page=${nextPage}`,
-      });
+    res.render("products", {
+      products: docs,
+      hasPrevPage,
+      hasNextPage,
+      nextPage,
+      prevPage,
+      page,
+      totalPages,
+      user: req.session.user,
+    });
+    // .send({
+    //   status: "success",
+    //   payload: docs,
+    //   totalPages,
+    //   prevPage,
+    //   nextPage,
+    //   page,
+    //   hasPrevPage,
+    //   hasNextPage,
+    //   prevLink: `/products-view?page=${prevPage}`,
+    //   nextLink: `/products-view?page=${nextPage}`,
+    // });
   } catch (error) {
     console.error(error.message);
   }
@@ -85,7 +84,7 @@ router.get("/carts/:cid", async (req, res) => {
     res.render("carts", { products: transformedProducts });
   } catch (error) {
     console.error(error.message);
-    res.status(500).send("Error interno del servidor");
+    res.status(500).send("Internal Server Error");
   }
 });
 
