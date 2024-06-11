@@ -1,24 +1,31 @@
 const form = document.getElementById("registerForm");
 
-form.addEventListener("submit", (e) => {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const data = new FormData(form);
+  const formData = new FormData(form);
   const obj = {};
-  // {
-  //     first_name: "asdasd",
-  //     last_name: "asdasd",
-  //     age: 123
-  // }
-  data.forEach((value, key) => (obj[key] = value));
-  fetch("/api/sessions/register", {
+
+  formData.forEach((value, key) => (obj[key] = value));
+  obj.role = "USER";
+
+  const respuesta = await fetch("/api/users/register", {
     method: "POST",
-    body: JSON.stringify(obj),
     headers: {
+      Accept: "application/json",
       "Content-Type": "application/json",
     },
-  }).then((result) => {
-    if (result.status === 201) {
-      window.location.replace("/");
-    }
-  });
+    body: JSON.stringify(obj),
+  })
+
+  const content = await respuesta.json();
+  const { data } = content;
+
+  console.log({...content})
+
+  if (respuesta.status === 200) {
+    console.log(document.cookie);
+    console.log("Fetch done successfully")
+  } else {
+    location.href = "/register";
+  }
 });

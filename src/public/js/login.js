@@ -1,23 +1,42 @@
 const form = document.getElementById("loginForm");
 
-form.addEventListener("submit", (e) => {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const data = new FormData(form);
+  const formData = new FormData(form);
   const obj = {};
+  console.log(formData);
   // {
   //     email: "asdasd",
   //     password: "asdasd",
   // }
-  data.forEach((value, key) => (obj[key] = value));
-  fetch("/api/sessions/login", {
+  formData.forEach((value, key) => (obj[key] = value));
+  const respuesta = await fetch("/api/users/login", {
     method: "POST",
     body: JSON.stringify(obj),
     headers: {
+      Accept: "application/json",
       "Content-Type": "application/json",
     },
-  }).then((result) => {
-    if (result.status === 200) {
-      window.location.replace("/");
-    }
   });
+
+  const content = await respuesta.json();
+  const { data } = content;
+  console.log(data);
+
+  if (respuesta.status === 200) {
+    console.log(document.cookie);
+    // location.href = "/api/products";
+  } else {
+    location.href = "/login";
+  }
 });
+
+//   .then((result) => {
+//     if (result.status === 200) {
+//       window.location.replace("/");
+//       console.log(document.cookie);
+//     } else {
+//       location.href = "/login";
+//     }
+//   });
+// });

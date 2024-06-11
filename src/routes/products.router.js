@@ -1,107 +1,132 @@
-import { Router } from "express";
+import Router from "./router.js";
 import Products from "../dao/dbManagers/products.manager.js";
+import { accessRolesEnum, passportStrategiesEnum } from "../config/enums.js";
 
-const router = Router();
-const productsManager = new Products();
-
-// Get all products
-router.get("/", async (req, res) => {
-  try {
-    console.log("obteniendo productos");
-    const products = await productsManager.getAll();
-    res.send({ status: "success", payload: products });
-  } catch (error) {
-    res.status(500).send({ status: "error", message: error.message });
+export default class ProductsRouter extends Router {
+  constructor() {
+    super();
+    this.productsManager = new Products();
   }
-});
 
-// Create a new product
-router.post("/", async (req, res) => {
-  try {
-    const {
-      title,
-      description,
-      code,
-      price,
-      status,
-      stock,
-      category,
-      thumbnails,
-    } = req.body;
-    if (
-      !title ||
-      !description ||
-      !code ||
-      !price ||
-      !status ||
-      !stock ||
-      !category
-    ) {
-      return res
-        .status(400)
-        .send({ status: "error", message: "incomplete data" });
+  init() {
+    // get all product
+    this.get(
+      "/",
+      [accessRolesEnum.USER, accessRolesEnum.ADMIN],
+      passportStrategiesEnum.JWT,
+      this.getAll
+    );
+    // post a product
+    this.post(
+      "/",
+      [accessRolesEnum.ADMIN],
+      passportStrategiesEnum.JWT,
+      this.newProduct
+    );
+    // Update a product data
+    this.put(
+      "/:pid",
+      [accessRolesEnum.ADMIN],
+      passportStrategiesEnum.JWT,
+      this.updateProduct
+    );
+  }
+
+  // Get all products
+  async getAll(req, res) {
+    try {
+      const products = await this.productsManager.getAll();
+      res.sendSuccess(products);
+    } catch (error) {
+      res.sendServerError(error.message);
+    }
+  }
+  // Create a new product
+  async newProduct(req, res) {
+    try {
+      const {
+        title,
+        description,
+        code,
+        price,
+        status,
+        stock,
+        category,
+        thumbnails,
+      } = req.body;
+      if (
+        !title ||
+        !description ||
+        !code ||
+        !price ||
+        !status ||
+        !stock ||
+        !category
+      ) {
+        res.sendClientError("Incomplete data");
+      }
+
+      const result = await this.productsManager.save({
+        title,
+        description,
+        code,
+        price,
+        status,
+        stock,
+        category,
+        thumbnails,
+      });
+
+      res.sendSuccess(result);
+    } catch (error) {
+      res.sendServerError(error.message);
+    }
+  }
+
+  // Update a product data
+  async updateProduct(req,res) {
+    try {
+      const {
+        title,
+        description,
+        code,
+        price,
+        status,
+        stock,
+        category,
+        thumbnails,
+      } = req.body;
+      const { pid } = req.params;
+      if (
+        !title ||
+        !description ||
+        !code ||
+        !price ||
+        !status ||
+        !stock ||
+        !category
+      ){
+        res.sendClientError("Imcomplete data");
+      }
+      const result = await this.productsManager.update(pid, {
+        title,
+        description,
+        code,
+        price,
+        status,
+        stock,
+        category,
+        thumbnails,
+      });
+  
+      res.sendSuccess(result)
+
+    } catch (error) {
+      res.sendServerError(error.message);
     }
 
-    const result = await productsManager.save({
-      title,
-      description,
-      code,
-      price,
-      status,
-      stock,
-      category,
-      thumbnails,
-    });
-
-    res.status(201).send({ status: "success", payload: result });
-  } catch (error) {
-    res.status(500).send({ status: "error", message: error.message });
   }
-});
 
-// Update a product data
-router.put("/:pid", async (req, res) => {
-  try {
-    const {
-      title,
-      description,
-      code,
-      price,
-      status,
-      stock,
-      category,
-      thumbnails,
-    } = req.body;
-    const { pid } = req.params;
-    if (
-      !title ||
-      !description ||
-      !code ||
-      !price ||
-      !status ||
-      !stock ||
-      !category
-    ) {
-      return res
-        .status(400)
-        .send({ status: "error", message: "incomplete data" });
-    }
 
-    const result = await productsManager.update(pid, {
-      title,
-      description,
-      code,
-      price,
-      status,
-      stock,
-      category,
-      thumbnails,
-    });
+} // end
 
-    res.send({ status: "success", payload: result });
-  } catch (error) {
-    res.status(500).send({ status: "errror", message: error.message });
-  }
-});
-
-export default router;

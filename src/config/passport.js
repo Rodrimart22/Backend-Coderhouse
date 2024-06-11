@@ -1,57 +1,86 @@
-import passport from 'passport';
-import GitHubStrategy from 'passport-github2';
-import usersModel from '../models/users.model.js';
+import passport from "passport";
+import jwt from "passport-jwt";
+import { passportStrategiesEnum } from "./enums.js";
+import Users from "../dao/dbManagers/users.manager.js";
+import GitHubStrategy from "passport-github2";
+import {
+  PRIVATE_KEY_JWT,
+  GITHUB_CLIENT_ID,
+  GITHUB_SECRET,
+} from "./constants.js";
+import { generateToken } from "../utils.js";
+
+const JWTSrategy = jwt.Strategy;
+const ExtractJWT = jwt.ExtractJwt;
 
 const initializePassport = () => {
-    //Implementación de nuestro mecanismo de autenticación con github
-    passport.use('github', new GitHubStrategy({
-        clientID: 'Iv23ct1AOPdy6VFiA7UA',
-        clientSecret: 'ae1717053f7fc1c5936a565382b05860ae75ef93',
-        callbackURL: 'http://localhost:8080/api/sessions/github-callback',
-        scope: ['user:email']
-    }, async (accessToken, refreshToken, profile, done) => {
+  // passport with jwt
+  passport.use(
+    passportStrategiesEnum.JWT,
+    new JWTSrategy(
+      {
+        jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+        secretOrKey: PRIVATE_KEY_JWT,
+      },
+      async (jwt_payload, done) => {
         try {
-            console.log(profile);
-            // {
-                    // _json: {
-                    //     name: 'alex'
-                    // }
-            //     emails: [{value: 'ap@hotmail.com'}]
-            // }
-            const email = profile.emails[0].value;
-            const user = await usersModel.findOne({ email });
-
-            if(!user) {
-                //crear la cuenta o usuario desde cero
-                const newUser = {
-                    first_name: profile._json.name,
-                    last_name: '',
-                    age: 18,
-                    email,
-                    password: ''
-                }
-
-                const result = await usersModel.create(newUser);
-                return done(null, result); //req.user {first,last,age,email}
-            } else {
-                return done(null, user);
-            }
+          return done(null, jwt_payload.user); //req.user
         } catch (error) {
-            return done(`Incorrect credentials`)
+          return done(error);
         }
-    }));
+      }
+    )
+  );
 
-    //Serializaccion y DeSerializaccion
-    passport.serializeUser((user, done) => {
-        done(null, user._id);
-    });
+  //Github Strategy
+  passport.use(
+    passportStrategiesEnum.GITHUB,
+    new GitHubStrategy(
+      {
+        clientID: GITHUB_CLIENT_ID,
+        clientSecret: GITHUB_SECRET,
+        callbackURL: "http://localhost:8080/api/sessions/github-callback",
+        scope: ["user:email"],
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const UsersModel = new Users();
+          const email = profile.emails[0].value;
+          const user = await UsersModel.getByEmail(email)
 
-    passport.deserializeUser(async(id, done) => {
-        const user = await usersModel.findById(id);
-        done(null, user);
-    })
-}
+          if (!user) {
+            const newUser = {
+              first_name: profile._json.name,
+              last_name: "",
+              email,
+              age: 18,
+              role: "USER",
+              password: "",
+            };
 
-export {
-    initializePassport
-}
+            const result = await UsersModel.save(newUser);
+
+            // const accessToken = generateToken(result)
+            return done(null, result); //req.user
+          } else {
+            return done(null, user);
+          }
+        } catch (error) {
+          return done(error);
+        }
+      }
+    )
+  );
+
+  //Serializaccion y DeSerializaccion
+  passport.serializeUser((user, done) => {
+    done(null, user._id);
+  });
+
+  passport.deserializeUser(async (id, done) => {
+    const user = await usersModel.findById(id);
+    done(null, user);
+  });
+};
+
+export default initializePassport;

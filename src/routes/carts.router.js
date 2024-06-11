@@ -1,132 +1,160 @@
-import { Router } from "express";
+import Router from "./router.js";
 import Carts from "../dao/dbManagers/carts.manager.js";
 import Products from "../dao/dbManagers/products.manager.js";
+import { accessRolesEnum, passportStrategiesEnum } from "../config/enums.js";
 
-const router = Router();
-const cartsManager = new Carts();
-const productsManager = new Products();
-
-// Get all  carts
-router.get("/", async (req, res) => {
-  try {
-    console.log("Obteniendo Carritos");
-    const carts = await cartsManager.getAll();
-    res.send({ status: "success", payload: carts });
-  } catch (error) {
-    res.status(500).send({ status: "error", message: error.message });
+export default class CartsRouter extends Router {
+  constructor() {
+    super();
+    this.cartsManager = new Carts();
+    this.productsManager = new Products();
   }
-});
 
-// Get all  carts
-router.get("/:cid", async (req, res) => {
-  try {
-    const { cid } = req.params;
-    console.log("Obteniendo Carrito");
-    const cart = await cartsManager.getOne(cid)
-    res.send({ status: "success", payload: cart });
-  } catch (error) {
-    res.status(500).send({ status: "error", message: error.message });
+  init() {
+    // Get all  carts
+    this.get(
+      "/",
+      [accessRolesEnum.ADMIN],
+      passportStrategiesEnum.JWT,
+      this.getAll
+    );
+
+    // Get One  cart
+    this.get(
+      "/:cid",
+      [accessRolesEnum.PUBLIC],
+      passportStrategiesEnum.JWT,
+      this.getOne
+    );
+
+    // Create a new cart
+    this.post(
+      "/",
+      [accessRolesEnum.PUBLIC],
+      passportStrategiesEnum.JWT,
+      this.save
+    );
+
+    // Update Cart with products
+    this.put(
+      "/:cid",
+      [accessRolesEnum.PUBLIC],
+      passportStrategiesEnum.JWT,
+      this.putProducts
+    );
+
+    // Update one cart product quantity
+    this.put(
+      "/:cid/products/:pid",
+      [accessRolesEnum.PUBLIC],
+      passportStrategiesEnum.JWT,
+      this.putQuantity
+    );
+
+    // Delete an specific product of a cart
+    this.put(
+      "/:cid/products/:pid",
+      [accessRolesEnum.PUBLIC],
+      passportStrategiesEnum.JWT,
+      this.deleteProduct
+    );
+
+    // Delete an specific product of a cart
+    this.put(
+      "/:cid",
+      [accessRolesEnum.PUBLIC],
+      passportStrategiesEnum.JWT,
+      this.deleteCart
+    );
   }
-});
 
-// Create a new cart
-router.post("/", async (req, res) => {
-  try {
-    const data = { products: [] };
-    const result = await cartsManager.save(data);
-
-    res.status(201).send({ status: "success", payload: result });
-  } catch (error) {
-    res.status(500).send({ status: "error", message: error.message });
+  async getAll(req, res) {
+    try {
+      const cart = await this.cartsManager.getAll();
+      res.sendSuccess(cart);
+    } catch (error) {
+      res.sendServerError(error.message);
+    }
   }
-});
-// router.post("/", async (req, res) => {
-//   try {
-//     const { pid, quantity = 1 } = req.body;
-//     const product = await productsManager.getOne(pid);
-//     if (!product) {
-//       return res
-//         .status(400)
-//         .send({ status: "error", message: "incomplete data" });
-//     }
-//     const { _id } = product;
-//     const data = { products: [{ product: _id, quantity }] };
-//     const result = await cartsManager.save(data);
+  async getOne(req, res) {
+    try {
+      const { cid } = req.params;
+      const cart = await this.cartsManager.getOne(cid);
+      res.sendSuccess(cart);
+    } catch (error) {
+      res.sendServerError(error.message);
+    }
+  }
 
-//     res.status(201).send({ status: "success", payload: result });
-//   } catch (error) {
-//     res.status(500).send({ status: "error", message: error.message });
-//   }
-// });
+  async save(req, res) {
+    try {
+      const result = await this.cartsManager.save();
+      res.sendSucessNewResource(result);
+    } catch (error) {
+      res.sendServerError(error.message);
+    }
+  }
 
-// Update the cart with products
-router.put("/:cid", async (req, res) => {
-  try {
+  // Update the cart with products
+  async putProducts(req, res) {
     const products = req.body;
     const { cid } = req.params;
-    console.log(products);
     if (!products) {
-      return res
-        .status(400)
-        .send({ status: "error", message: "incomplete data" });
+      res.sendClientError("No products received");
     }
-    const result = await cartsManager.updateProducts(cid, products);
-
-    res.send({ status: "success", payload: result });
-  } catch (error) {
-    res.status(500).send({ status: "error", message: error.message });
+    const result = await this.cartsManager.updateProducts(cid, products);
+    res.sendSucessNewResource(result);
   }
-});
+  catch(error) {
+    res.sendServerError(error.message);
+  }
 
-// Update one cart product quantity
-router.put("/:cid/products/:pid", async (req, res) => {
-  try {
-    const { cid, pid } = req.params;
-    const { quantity } = req.body;
+  // Update one cart product quantity
+  async putQuantity(req, res) {
+    try {
+      const { cid, pid } = req.params;
+      const { quantity } = req.body;
+      const cart = await this.cartsManager.getOne(cid);
+      const product = await this.productsManager.getOne(pid);
 
-    const cart = await cartsManager.getOne(cid);
-    const product = await productsManager.getOne(pid);
-    if (!quantity || !cart || !product) {
-      res
-        .status(400)
-        .send({ status: "error", message: "Cart or Product not found" });
+      if (!quantity || !cart || !product) {
+        res.sendClientError("Cart or product not found");
+      }
+      const result = await this.cartsManager.updateOneProduct(
+        cid,
+        pid,
+        quantity
+      );
+      res.sendSuccess(result);
+    } catch (error) {
+      res.sendServerError(error.message);
     }
-
-    const result = await cartsManager.updateOneProduct(cid, pid, quantity);
-    res.send({ status: "sucess", payload: result });
-  } catch (error) {
-    res.status(500).send({ status: "error", message: error.message });
   }
-});
 
-// Delete an specific product of a cart
-router.delete("/:cid/products/:pid", async (req, res) => {
-  try {
-    const { cid, pid } = req.params;
-
-    const cart = await cartsManager.getOne(cid);
-    const product = await productsManager.getOne(pid);
-    if (!cart || !product) {
-      res
-        .status(400)
-        .send({ status: "error", message: "Cart or Product not found" });
+  // Delete an specific product of a cart
+  async deleteProduct(req, res) {
+    try {
+      const { cid, pid } = req.params;
+      const cart = await this.cartsManager.getOne(cid);
+      const product = await this.productsManager.getOne(pid);
+      if (!cart || !product) {
+        res.sendClientError("Cart or Product not found");
+      }
+      const result = await this.cartsManager.deleteCartProduct(cid, pid);
+      res.sendSuccess(result);
+    } catch (error) {
+      res.sendServerError(error.message);
     }
-    const result = await cartsManager.deleteCartProduct(cid, pid);
-    res.send({ status: "success", payload: result });
-  } catch (error) {
-    res.status(500).send({ status: "error", message: error.message });
   }
-});
 
-//Delete all products of the cart
-router.delete("/:cid", async (req, res) => {
-  try {
-    const { cid } = req.params;
-    const result = await cartsManager.clearCart(cid);
-    res.send({ status: "sucess", payload: result });
-  } catch (error) {
-    res.status(500).send({ status: "error", message: error.message });
+  //Delete all products of the cart
+  async deleteCart(req, res) {
+    try {
+      const { cid } = req.params;
+      const result = await this.cartsManager.clearCart(cid);
+      res.sendSuccess(result);
+    } catch (error) {
+      res.sendServerError(error.message);
+    }
   }
-});
-
-export default router;
+}

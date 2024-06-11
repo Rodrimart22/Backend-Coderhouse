@@ -3,17 +3,44 @@ import mongoose from "mongoose";
 const userCollection = "users";
 
 const userSchema = new mongoose.Schema({
-  first_name: String,
-  last_name: String,
-  email: String,
+  first_name: {
+    type: String,
+    required: true
+  },
+  last_name: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true
+  },
   age: Number,
-  password: String,
+  password: {
+    type: String,
+    required: true
+  },
   role: {
     type: String,
-    enum: ["admin", "user"],
-    default: "user",
+    required : true,
+    default: "USER",
   },
+  cart_id: {
+    type: 
+      {
+        cart: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "carts"
+        }
+      }      
+    
+  }
 });
+
+userSchema.pre(["find", "findOne"], function() {
+  this.populate("cart_id.cart")
+})
 
 export const usersModel = mongoose.model(userCollection, userSchema);
 

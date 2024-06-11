@@ -1,4 +1,4 @@
-import { cartsModel } from "../dbManagers/models/carts.model.js";
+import { cartsModel } from "./models/carts.model.js";
 
 export default class Carts {
   constructor() {
@@ -15,8 +15,8 @@ export default class Carts {
     return carts;
   };
 
-  save = async (productId) => {
-    const result = await cartsModel.create(productId);
+  save = async () => {
+    const result = await cartsModel.create();
     return result;
   };
 
