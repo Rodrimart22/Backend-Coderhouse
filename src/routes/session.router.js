@@ -5,6 +5,11 @@ import passport from "passport";
 
 const router = Router();
 
+//  Este archivo no esta funcional ni operando 
+// pero sirve de guia de como estaban las cosas antes
+// con passport-local para register, login, y github funcional
+// 
+
 // Register with passport
 router.post(
   "/register",

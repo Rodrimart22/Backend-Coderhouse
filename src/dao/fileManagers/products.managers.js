@@ -4,7 +4,7 @@ export default class productManager {
   constructor(path) {
     this.path = path;
   }
-  getProducts = async () => {
+  getAll = async () => {
     try {
       if (fs.existsSync(this.path)) {
         const data = await fs.promises.readFile(this.path, "utf-8");
@@ -18,7 +18,7 @@ export default class productManager {
     }
   };
 
-  addProduct = async (
+  save = async (
     title,
     description,
     price,
@@ -30,7 +30,7 @@ export default class productManager {
   ) => {
     try {
       // obtener lista de productos
-      const products = await this.getProducts();
+      const products = await this.getAll();
 
       // Verificar si el codigo ingresado existe
       const codeExist = products.find((p) => p.code === code);
@@ -67,10 +67,10 @@ export default class productManager {
     }
   };
 
-  getProductById = async (productID) => {
+  getOne = async (productID) => {
     try {
       // obtener lista de productos
-      const products = await this.getProducts();
+      const products = await this.getAll();
 
       const productSearch = products.findIndex((prod) => prod.id === productID);
       if (productSearch === -1) {
@@ -84,7 +84,7 @@ export default class productManager {
     }
   };
 
-  updateProduct = async (productID, objActualizado) => {
+  update = async (productID, objActualizado) => {
     const {
       title,
       description,
@@ -98,7 +98,7 @@ export default class productManager {
 
     try {
       // obtener lista de productos
-      const products = await this.getProducts();
+      const products = await this.getAll();
 
       const productSearch = products.findIndex((prod) => prod.id === productID);
       if (productSearch === -1) {

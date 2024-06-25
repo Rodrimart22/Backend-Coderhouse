@@ -4,7 +4,7 @@ export default class cartManager {
   constructor(path) {
     this.path = path;
   }
-  getCarts = async () => {
+  getAll = async () => {
     try {
       if (fs.existsSync(this.path)) {
         const data = await fs.promises.readFile(this.path, "utf-8");
@@ -41,7 +41,7 @@ export default class cartManager {
     }
   };
 
-  getCartById = async (cartID) => {
+  getOne = async (cartID) => {
     try {
       // obtener lista de cartos
       const carts = await this.getCarts();

@@ -8,6 +8,9 @@ import ViewsRouter from "./routes/views.router.js";
 import UsersRouter from "./routes/users.router.js";
 import ProductsRouter from "./routes/products.router.js";
 import CartsRouter from "./routes/carts.router.js";
+import configs from "./config/config.js";
+
+console.log(`La aplicación se está ejecutando en el puerto ${configs.port}`);
 
 const app = express();
 
@@ -28,23 +31,20 @@ app.engine("handlebars", handlebars.engine());
 app.set("views", `${__dirname}/views`);
 app.set("view engine", "handlebars");
 
-try {
-  await mongoose.connect(
-    "mongodb+srv://martinezmondelli:j1mT8CP8yjC5Iy6z@cluster0.xax460v.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Cluster0"
-  );
-  console.log("DB connected");
-} catch (error) {
-  console.log(error.message);
-}
+// try {
+//   await mongoose.connect(configs.mongoUrl);
+//   console.log("DB connected");
+// } catch (error) {
+//   console.log(error.message);
+// }
 
 try {
   app.use("/", viewsRouter.getRouter());
-  app.use("/api/carts", cartsRouter.getRouter() );
+  app.use("/api/carts", cartsRouter.getRouter());
   app.use("/api/products", productsRouter.getRouter());
   app.use("/api/users", usersRouter.getRouter());
-  
 } catch (error) {
-  console.log(error.message)
+  console.log(error.message);
 }
 
 app.listen(8080, () => console.log("Server running"));
