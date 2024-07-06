@@ -1,36 +1,28 @@
-import { Router } from "express";
-import Messages from "../dao/dbManagers/messages.manager.js";
+import Router from "./router.js";
 
-const router = Router();
-const messagesManager = new Messages();
+import { accessRolesEnum, passportStrategiesEnum } from "../config/enums.js";
+import { getAll, saveMessage } from "../controllers/messages.controller.js";
 
-router.get("/", async (req, res) => {
-  try {
-    const messages = messagesManager.getAll();
-    res.send({ status: "success", payload: messages });
-  } catch (error) {
-    res.status(500).send({ status: "error", message: error.message });
+export default class MessagesRouter extends Router {
+  constructor() {
+    super();
   }
-});
 
-router.post("/", async (req, res) => {
-  try {
-    const { user, message } = req.body;
-    if (!user || !message) {
-      return res
-        .status(400)
-        .send({ status: "error", message: "incomplete data" });
-    }
+  init() {
+    //Obtain all messages stored
+    this.get(
+      "/",
+      [accessRolesEnum.PUBLIC],
+      passportStrategiesEnum.NOTHING,
+      getAll
+    );
 
-    const result = await messagesManager.save({
-      user,
-      message,
-    });
-
-    res.status(201).send({ status: "success", payload: result });
-  } catch (error) {
-    res.status(500).send({ status: "error", message: error.message });
+    // Store a new Message
+    this.post(
+      "/",
+      [accessRolesEnum.USER],
+      passportStrategiesEnum.JWT,
+      saveMessage
+    );
   }
-});
-
-export default router;
+}

@@ -1,4 +1,3 @@
-
 import { Products } from "../dao/factory.js";
 import ProductsRepository from "../repositories/products.repository.js";
 
@@ -10,6 +9,16 @@ const getAll = async (req, res) => {
   try {
     const products = await productsRepository.getAllProducts();
     res.sendSuccess(products);
+  } catch (error) {
+    res.sendServerError(error.message);
+  }
+};
+// Get one products
+const getOne = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const product = await productsRepository.getOneProduct(pid);
+    res.sendSuccess(product);
   } catch (error) {
     res.sendServerError(error.message);
   }
@@ -98,4 +107,15 @@ const updateProduct = async (req, res) => {
   }
 };
 
-export { getAll, newProduct, updateProduct };
+// Delete one products
+const deleteProduct = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const product = await productsRepository.deleteProduct(pid);
+    res.sendSuccess(product);
+  } catch (error) {
+    res.sendServerError(error.message);
+  }
+};
+
+export { getAll, getOne, newProduct, updateProduct, deleteProduct };

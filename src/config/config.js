@@ -1,21 +1,22 @@
 import dotenv from "dotenv";
-// import { Command } from "commander";
+import { Command } from "commander";
 
-// const program = new Command();
+const program = new Command();
 
-// program.option("--mode <modo>", "variable de ambiente");
-// program.parse();
+program.option("--mode <modo>", "variable de ambiente");
+program.parse();
 
 // //DEVELOPMENT, PRODUCTION
-// const environment = program.opts().mode;
+const environment = program.opts().mode;
+// console.log(environment);
 
-dotenv
-  .config
-  //     {
-  //   path:
-  //     environment === "PRODUCTION" ? "./.env.production" : "./.env.development",
-  // }
-  ();
+dotenv.config();
+// {
+//   path:
+//     environment === "PRODUCTION"
+//       ? "../../.env.production"
+//       : "../../.env.development",
+// });
 
 const config = {
   port: process.env.PORT,

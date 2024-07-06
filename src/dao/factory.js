@@ -4,6 +4,7 @@ const persistence = config.persistence;
 let Carts;
 let Products;
 let Users;
+let Messages;
 let Tickets;
 
 switch (persistence) {
@@ -24,6 +25,14 @@ switch (persistence) {
       "./dbManagers/users.manager.js"
     );
     Users = UsersMongo;
+    const { default: MessagesMongo } = await import(
+      "./dbManagers/messages.manager.js"
+    );
+    Messages = MessagesMongo;
+    const { default: TicketsMongo } = await import(
+      "./dbManagers/tickets.manager.js"
+    );
+    Tickets = TicketsMongo;
 
     break;
   case "MEMORY":
@@ -35,4 +44,4 @@ switch (persistence) {
     break;
 }
 
-export { Carts, Products, Users };
+export { Carts, Products, Users, Messages, Tickets };

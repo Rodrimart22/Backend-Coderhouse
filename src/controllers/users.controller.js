@@ -1,5 +1,6 @@
-import { getUser, saveUser } from "../service/users.service.js";
 import { createHash, generateToken, isValidPassword } from "../utils.js";
+
+import { registerUser } from "../service/users.service.js";
 
 import { Users } from "../dao/factory.js";
 import UsersRepository from "../repositories/users.repository.js";
@@ -26,15 +27,13 @@ const register = async (req, res) => {
     const newUser = {
       ...req.body,
     };
-
-    // console.log(newUser);
-
     newUser.password = hashedPassword;
 
-    const result = await usersRepository.saveUser(newUser);
+    const result = await registerUser(newUser);
 
     res.sendSucessNewResource(result);
   } catch (error) {
+    console.log("Error Message");
     res.sendServerError(error.message);
   }
 };
@@ -61,7 +60,10 @@ const login = async (req, res) => {
 
     const accessToken = generateToken(user);
 
-    res.sendSuccess(accessToken);
+    // res.sendSuccess(accessToken);
+    res
+      .cookie("jwt", accessToken, { httpOnly: true, maxAge: 3600000 })
+      .sendSuccess(accessToken);
   } catch (error) {
     res.sendServerError(error.message);
   }

@@ -26,10 +26,9 @@ form.addEventListener("submit", async (e) => {
   if (respuesta.status === 200) {
     console.log(document.cookie);
 
-    // Configurar la cookie con el token
+    // Configurar la cookie con el token 1 hora de duración
     // res.cookie('jwt', token, { httpOnly: true, maxAge: 3600000 });
-     // 1 hora de duración
-    // location.href = "/api/products";
+    location.href = "/api/products";
   } else {
     location.href = "/login";
   }

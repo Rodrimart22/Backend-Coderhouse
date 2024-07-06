@@ -4,7 +4,9 @@ import {
   getAll,
   getOne,
   save,
+  cartPurchase,
   putProducts,
+  addOneProduct,
   putQuantity,
   deleteProduct,
   deleteCart,
@@ -22,18 +24,26 @@ export default class CartsRouter extends Router {
     // Get One  cart
     this.get(
       "/:cid",
-      [accessRolesEnum.PUBLIC],
+      [accessRolesEnum.ADMIN],
       passportStrategiesEnum.JWT,
       getOne
     );
 
+    // Purchase the cart of the user
+    this.post(
+      "/:cid/purchase",
+      [accessRolesEnum.USER],
+      passportStrategiesEnum.JWT,
+      cartPurchase
+    );
+
     // Create a new cart
-    this.post("/", [accessRolesEnum.PUBLIC], passportStrategiesEnum.JWT, save);
+    // this.post("/", [accessRolesEnum.PUBLIC], passportStrategiesEnum.JWT, save);
 
     // Update Cart with products
     this.put(
       "/:cid",
-      [accessRolesEnum.PUBLIC],
+      [accessRolesEnum.USER],
       passportStrategiesEnum.JWT,
       putProducts
     );
@@ -41,25 +51,25 @@ export default class CartsRouter extends Router {
     // Update one cart product quantity
     this.put(
       "/:cid/products/:pid",
-      [accessRolesEnum.PUBLIC],
+      [accessRolesEnum.USER],
       passportStrategiesEnum.JWT,
-      putQuantity
+      addOneProduct
     );
 
-    // Delete an specific product of a cart
-    this.put(
-      "/:cid/products/:pid",
-      [accessRolesEnum.PUBLIC],
-      passportStrategiesEnum.JWT,
-      deleteProduct
-    );
-
-    // Delete an specific product of a cart
+    // Delete an specific cart to blank
     this.put(
       "/:cid",
-      [accessRolesEnum.PUBLIC],
+      [accessRolesEnum.USER, accessRolesEnum.ADMIN],
       passportStrategiesEnum.JWT,
       deleteCart
+    );
+
+    // Delete an specific product of a cart
+    this.delete(
+      "/:cid/products/:pid",
+      [accessRolesEnum.USER],
+      passportStrategiesEnum.JWT,
+      deleteProduct
     );
   }
 }

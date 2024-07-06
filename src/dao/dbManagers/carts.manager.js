@@ -11,12 +11,32 @@ export default class Carts {
   };
 
   getOne = async (id) => {
-    const carts = await cartsModel.find({ _id: id });
+    const carts = await cartsModel.findOne({ _id: id }).lean();
     return carts;
   };
 
   save = async () => {
-    const result = await cartsModel.create();
+    const result = await cartsModel.create({});
+    return result;
+  };
+
+  addOneProduct = async (id, pid) => {
+    const cart = await cartsModel.findById(id);
+
+    // Check if the product is already in the cart
+    const existingProduct = cart.products.find((product) =>
+      product.product.equals(pid)
+    );
+
+    if (existingProduct) {
+      // If the product already exists, increment the quantity
+      existingProduct.quantity += 1;
+    } else {
+      // If the product is not in the cart, add it with quantity 1
+      cart.products.push({ product: pid, quantity: 1 });
+    }
+
+    const result = await cart.save();
     return result;
   };
 

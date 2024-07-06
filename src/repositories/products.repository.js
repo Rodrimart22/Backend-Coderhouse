@@ -8,8 +8,8 @@ export default class ProductsRepository {
     return products;
   };
 
-  getOneProduct = async () => {
-    const product = await this.dao.getOne();
+  getOneProduct = async (pid) => {
+    const product = await this.dao.getOne(pid);
     return product;
   }
 
@@ -28,4 +28,10 @@ export default class ProductsRepository {
     });
     return result;
   };
+
+  // Delete one product
+  deleteProduct = async (pid) => {
+    const product = await this.dao.delete(pid);
+    return product;
+  }
 }

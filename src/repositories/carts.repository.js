@@ -8,7 +8,7 @@ export default class CartsRepository {
     return result;
   };
 
-  getOne = async () => {
+  getOne = async (cid) => {
     const result = await this.dao.getOne(cid);
     return result;
   };
@@ -21,6 +21,12 @@ export default class CartsRepository {
   // Update the cart with products
   putProducts = async (cid, products) => {
     const result = await this.dao.updateProducts(cid, products);
+    return result;
+  };
+
+  //Add one product
+  addOneProduct = async (cid, pid) => {
+    const result = await this.dao.addOneProduct(cid, pid);
     return result;
   };
 

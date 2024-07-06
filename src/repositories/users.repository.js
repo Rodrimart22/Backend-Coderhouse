@@ -1,10 +1,13 @@
+import UsersDto from "../DTOs/users.dto.js";
+
 export default class UsersRepository {
   constructor(dao) {
     this.dao = dao;
   }
 
   getUser = async (email) => {
-    const result = await this.dao.getByEmail(email);
+    const user = await this.dao.getByEmail(email);
+    const result = user !== null && new UsersDto(user);
     return result;
   };
 
@@ -12,4 +15,6 @@ export default class UsersRepository {
     const result = await this.dao.save(newUser);
     return result;
   };
+
+
 }

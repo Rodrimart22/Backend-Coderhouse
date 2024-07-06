@@ -24,4 +24,9 @@ export default class Products {
     const result = await productsModel.updateOne({ _id: id }, product);
     return result;
   };
+
+  delete = async (id) => {
+    const product = await productsModel.deleteOne({ _id: id });
+    return product;
+  };
 }

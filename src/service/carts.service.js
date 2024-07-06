@@ -1,59 +1,82 @@
-import Carts from "../dao/dbManagers/carts.manager.js";
+import { Carts, Products } from "../dao/factory.js";
+import CartsRepository from "../repositories/carts.repository.js";
+import ProductsRepository from "../repositories/products.repository.js";
+import * as ticketsService from "./tickets.service.js";
+import mongoose from "mongoose";
 
-const cartsManager = new Carts();
+const CartsDao = new Carts();
+const cartsRepository = new CartsRepository(CartsDao);
+const ProductsDao = new Products();
+const productsRepository = new ProductsRepository(ProductsDao);
 
-const getAll = async () => {
-  const cart = await cartsManager.getAll();
-  return cart;
-  
-};
-const getOne = async (cid) => {
-  const cart = await cartsManager.getOne(cid);
-  return cart;
-};
+// Add one product quantity or update quantity
+const addProduct = async (cid, pid, quantity = 0) => {
+  try {
+    const result =
+      quantity === 0
+        ? await cartsRepository.addOneProduct(cid, pid)
+        : await cartsRepository.putQuantity(cid, pid, quantity);
 
-const save = async () => {
-  const result = await cartsManager.save();
-  return result;
-};
-
-// Update the cart with products
-const putProducts = async (cid, products) => {
-  const result = await cartsManager.updateProducts(cid, products);
-  return result;
-};
-
-// Update one cart product quantity
-const putQuantity = async (cid, pid, quantity) => {
-  const result = await cartsManager.updateOneProduct(cid, pid, quantity);
-  return result;
+    return result;
+  } catch (error) {
+    console.error("Error en service - ", error.message);
+  }
 };
 
-//Clear cart of products
-const clearCart = async (cid) => {
-  const result = await cartsManager.clearCart(cid);
-  return result;
+// Process to purchase the cart of the user,
+const purchase = async (cid, user) => {
+  let session;
+
+  try {
+    session = await mongoose.startSession();
+    session.startTransaction();
+
+    const cart = await cartsRepository.getOne(cid);
+
+    if (!cart || !cart.products || cart.products.length === 0) {
+      console.error("Error en Carts service - Carrito no encontrado o vacío");
+      return;
+    }
+
+    const operations = await Promise.all(
+      cart.products.map(async ({ product, quantity }) => {
+        try {
+          const productData = await productsRepository.getOneProduct(product);
+          // console.log("Product data:", productData);
+
+          if (productData.stock >= quantity) {
+            productData.stock -= quantity;
+            await productsRepository.updateProduct(product, {
+              stock: productData.stock,
+            });
+            return quantity * productData.price;
+          } else {
+            return { product, quantity };
+          }
+        } catch (error) {
+          console.error("Error processing product:", error.message);
+          throw error; // Propagar el error para identificar la causa raíz.
+        }
+      })
+    );
+
+    const amount = operations
+      .filter((result) => typeof result === "number")
+      .reduce((acc, value) => acc + value, 0);
+    const outStock = operations.filter((result) => typeof result !== "number");
+
+    const ticket = await ticketsService.generatePurchase(user, amount);
+
+    await cartsRepository.putProducts(cid, outStock);
+    await session.commitTransaction();
+
+    return ticket;
+  } catch (error) {
+    await session?.abortTransaction();
+    console.error("Error en Carts service - ", error.message);
+  } finally {
+    session?.endSession();
+  }
 };
 
-// Delete an specific product of a cart
-const deleteProduct = async (cid, pid) => {
-  const result = await cartsManager.deleteCartProduct(cid, pid);
-  return result;
-};
-
-//Delete all products of the cart
-const deleteCart = async (cid) => {
-  const result = await cartsManager.clearCart(cid);
-  return result;
-};
-
-export {
-  getAll,
-  getOne,
-  save,
-  putProducts,
-  putQuantity,
-  clearCart,
-  deleteCart,
-  deleteProduct,
-};
+export { addProduct, purchase };
