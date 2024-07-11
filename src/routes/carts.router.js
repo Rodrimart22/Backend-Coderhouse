@@ -37,9 +37,6 @@ export default class CartsRouter extends Router {
       cartPurchase
     );
 
-    // Create a new cart
-    // this.post("/", [accessRolesEnum.PUBLIC], passportStrategiesEnum.JWT, save);
-
     // Update Cart with products
     this.put(
       "/:cid",

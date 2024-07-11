@@ -1,6 +1,7 @@
 import { createHash, generateToken, isValidPassword } from "../utils.js";
-
 import { registerUser } from "../service/users.service.js";
+import EErrors from "../middlewares/errors/enums.js";
+import CustomError from "../middlewares/errors/CustomError.js";
 
 import { Users } from "../dao/factory.js";
 import UsersRepository from "../repositories/users.repository.js";
@@ -43,6 +44,12 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
+      throw CustomError.createError({
+        name: "UserError",
+        cause: "Invalid data types, email and password required",
+        message: "Error trying to create user",
+        code: EErrors.INVALID_TYPE_ERROR,
+      });
       return res.sendClientError("incomplete values");
     }
 

@@ -25,5 +25,6 @@ const config = {
   githubClientId: process.env.GITHUB_CLIENT_ID,
   githubSecret: process.env.GITHUB_SECRET,
   persistence: process.env.PERSISTENCE,
+  environment: environment ? environment : process.env.ENVIRONMENT
 };
 export default config;
