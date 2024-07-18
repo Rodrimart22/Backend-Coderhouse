@@ -8,14 +8,12 @@ program.parse();
 
 // //DEVELOPMENT, PRODUCTION
 const environment = program.opts().mode;
-// console.log(environment);
+console.log(environment);
 
 dotenv.config();
-// {
-//   path:
-//     environment === "PRODUCTION"
-//       ? "../../.env.production"
-//       : "../../.env.development",
+
+// dotenv.config({
+//   path: (environment === "DEVELOPMENT") ? "./.env.dev" : "./.env.prod",
 // });
 
 const config = {
@@ -25,6 +23,6 @@ const config = {
   githubClientId: process.env.GITHUB_CLIENT_ID,
   githubSecret: process.env.GITHUB_SECRET,
   persistence: process.env.PERSISTENCE,
-  environment: environment ? environment : process.env.ENVIRONMENT
+  environment: environment ? environment : process.env.ENVIRONMENT,
 };
 export default config;

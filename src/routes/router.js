@@ -2,7 +2,6 @@ import { Router as expressRouter } from "express";
 import passport from "passport";
 import { accessRolesEnum, passportStrategiesEnum } from "../config/enums.js";
 import { HTTP_STATUS } from "./routerExtra/httpStatus.js";
-import toAsyncRouter from "async-express-decorator";
 
 export default class Router {
   constructor() {
@@ -119,13 +118,11 @@ export default class Router {
       try {
         await callback.apply(this, params);
       } catch (error) {
-        params[1]
-          .status(HTTP_STATUS.SERVER_ERROR)
-          .json({
-            status: "error",
-            message: "Internal Server Error",
-            originalError: error.message,
-          });
+        params[1].status(HTTP_STATUS.SERVER_ERROR).json({
+          status: "error",
+          message: "Internal Server Error",
+          originalError: error.message,
+        });
       }
     });
   }
