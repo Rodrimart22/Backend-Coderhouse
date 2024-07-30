@@ -3,8 +3,10 @@ import { accessRolesEnum, passportStrategiesEnum } from "../config/enums.js";
 import {
   register,
   login,
+  updateRole,
   githubCallback,
   logout,
+  checkAndSend, updatePassword
 } from "../controllers/users.controller.js";
 
 export default class UsersRouter extends Router {
@@ -33,6 +35,13 @@ export default class UsersRouter extends Router {
       passportStrategiesEnum.NOTHING,
       register
     );
+
+    this.get(
+      "/premium/:uid",
+      [accessRolesEnum.USER, accessRolesEnum.PREMIUM],
+      passportStrategiesEnum.JWT,
+      updateRole
+    );
     this.get(
       "/github",
       [accessRolesEnum.PUBLIC],
@@ -55,6 +64,20 @@ export default class UsersRouter extends Router {
       [accessRolesEnum.PUBLIC],
       passportStrategiesEnum.GITHUB,
       logout
+    );
+
+    this.post(
+      "/pass-recovery",
+      [accessRolesEnum.PUBLIC],
+      passportStrategiesEnum.NOTHING,
+      checkAndSend
+    );
+
+    this.post(
+      "/pass-update",
+      [accessRolesEnum.PUBLIC],
+      passportStrategiesEnum.NOTHING,
+      updatePassword
     );
   }
 }

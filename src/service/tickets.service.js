@@ -1,12 +1,7 @@
 // importar dependencia de uuid
 import { v4 as uuidv4 } from "uuid";
 
-import { Tickets } from "../dao/factory.js";
-import TicketsRepository from "../repositories/tickets.repository.js";
-
-
-const TicketsDao = new Tickets();
-const ticketsRepository = new TicketsRepository(TicketsDao);
+import { ticketsRepository } from "../repositories/factoryRepository.js";
 
 const generatePurchase = async (user, amount) => {
   const newTicket = {

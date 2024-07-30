@@ -1,18 +1,15 @@
-import { Carts, Products } from "../dao/factory.js";
-import CartsRepository from "../repositories/carts.repository.js";
-import ProductsRepository from "../repositories/products.repository.js";
+import {
+  cartsRepository,
+  productsRepository,
+} from "../repositories/factoryRepository.js";
 import { addProduct, purchase } from "../service/carts.service.js";
-
-const CartsDao = new Carts();
-const ProductsDao = new Products();
-const cartsRepository = new CartsRepository(CartsDao);
-const productsRepository = new ProductsRepository(ProductsDao);
 
 const getAll = async (req, res) => {
   try {
     const cart = await cartsRepository.getAll();
     res.sendSuccess(cart);
   } catch (error) {
+    req.logger.error(error.message);
     res.sendServerError(error.message);
   }
 };
@@ -22,6 +19,7 @@ const getOne = async (req, res) => {
     const cart = await cartsRepository.getOne(cid);
     res.sendSuccess(cart);
   } catch (error) {
+    req.logger.error(error.message);
     res.sendServerError(error.message);
   }
 };
@@ -57,6 +55,7 @@ const putProducts = async (req, res) => {
     const result = await cartsRepository.putProducts(cid, products);
     res.sendSucessNewResource(result);
   } catch (error) {
+    req.logger.error(error.message);
     res.sendServerError(error.message);
   }
 };
@@ -70,12 +69,19 @@ const addOneProduct = async (req, res) => {
     const product = await productsRepository.getOneProduct(pid);
 
     if (!cart || !product) {
+      res.logger.info("Cart or product not found");
       res.sendClientError("Cart or product not found");
+    }
+
+    if (product.owner == req.user.email) {
+      req.logger.warning("Product owners can add it to their cart");
+      res.sendClientError("You can't add your own products");
     }
 
     const result = addProduct(cid, pid, quantity);
     res.sendSuccess("Producto modificado correctamente", result);
   } catch (error) {
+    req.logger.error(error.message);
     res.sendServerError("Error en controller", error.message);
   }
 };
@@ -94,6 +100,7 @@ const putQuantity = async (req, res) => {
     const result = cartsRepository.putQuantity(cid, pid, quantity);
     res.sendSuccess("", result);
   } catch (error) {
+    req.logger.error(error.message);
     res.sendServerError(error.message);
   }
 };
@@ -110,6 +117,7 @@ const deleteProduct = async (req, res) => {
     const result = cartsRepository.deleteProduct(cid, pid);
     res.sendSuccess(result);
   } catch (error) {
+    req.logger.error(error.message);
     res.sendServerError(error.message);
   }
 };
@@ -121,6 +129,7 @@ const deleteCart = async (req, res) => {
     const result = cartsRepository.clearCart(cid);
     res.sendSuccess(result);
   } catch (error) {
+    req.logger.error(error.message);
     res.sendServerError(error.message);
   }
 };

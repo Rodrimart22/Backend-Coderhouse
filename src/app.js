@@ -1,7 +1,7 @@
 // Imports of express configuration
 import express from "express";
 import handlebars from "express-handlebars";
-import mongoose from "mongoose";
+// import mongoose from "mongoose";
 import { __dirname } from "./utils.js";
 import initializePassport from "./config/passport.js";
 import passport from "passport";
@@ -42,13 +42,6 @@ app.use(express.static(`${__dirname}/public`));
 app.engine("handlebars", handlebars.engine());
 app.set("views", `${__dirname}/views`);
 app.set("view engine", "handlebars");
-
-try {
-  await mongoose.connect(configs.mongoUrl);
-  console.log("DB connected");
-} catch (error) {
-  console.log(error.message);
-}
 
 try {
   app.use("/", viewsRouter.getRouter());

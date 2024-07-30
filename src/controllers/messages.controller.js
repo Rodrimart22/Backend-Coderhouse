@@ -1,8 +1,4 @@
-import { Messages } from "../dao/factory.js";
-import MessagesRepository from "../repositories/messages.repository.js";
-
-const MessagesDao = new Messages();
-const messagesRepository = new MessagesRepository(MessagesDao);
+import { messagesRepository } from "../repositories/factoryRepository.js";
 
 const getAll = async (req, res) => {
   try {
@@ -28,4 +24,4 @@ const saveMessage = async (req, res) => {
   }
 };
 
-export { getAll, saveMessage }; 
+export { getAll, saveMessage };

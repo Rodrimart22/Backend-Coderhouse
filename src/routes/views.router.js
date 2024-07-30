@@ -3,7 +3,8 @@ import Carts from "../dao/dbManagers/carts.manager.js";
 import Products from "../dao/dbManagers/products.manager.js";
 import { accessRolesEnum, passportStrategiesEnum } from "../config/enums.js";
 import { productsModel } from "../dao/dbManagers/models/products.model.js";
-import { Passport } from "passport";
+import { sendEmail } from "../service/mail.service.js";
+import { decodeToken } from "../utils.js";
 
 export default class ViewsRouter extends Router {
   constructor() {
@@ -36,7 +37,7 @@ export default class ViewsRouter extends Router {
       passportStrategiesEnum.NOTHING,
       this.register
     );
-    //Login 
+    //Login
     this.get(
       "/login",
       [accessRolesEnum.PUBLIC],
@@ -51,8 +52,25 @@ export default class ViewsRouter extends Router {
       [accessRolesEnum.USER],
       passportStrategiesEnum.JWT,
       (req, res) => {
-        res.render("profile");
+        res.render("profile", {
+          user: req.user,
+        });
       }
+    );
+    //Send email to change password
+    this.get(
+      "/password-email",
+      [accessRolesEnum.PUBLIC],
+      passportStrategiesEnum.NOTHING,
+      this.passwordEmail
+    );
+
+    //Send email to change password
+    this.get(
+      "/password-change",
+      [accessRolesEnum.PUBLIC],
+      passportStrategiesEnum.NOTHING,
+      this.changePasword
     );
   }
 
@@ -108,6 +126,31 @@ export default class ViewsRouter extends Router {
     } catch (error) {
       res.sendServerError(error.message);
     }
-    
+  }
+
+  async passwordEmail(req, res) {
+    try {
+      res.render("forgotPassword");
+    } catch (error) {
+      res.sendServerError(error.message);
+    }
+  }
+
+  async changePasword(req, res) {
+    try {
+      const token = req.query.token;
+      const data = decodeToken(token, req);
+      // req.logger.info(data);
+      if (!data) {
+        res.status(404).render("404", {
+          title: "Página no encontrada, su token expiro",
+        });
+      }
+      res.render("changePassword", {
+        name: data?.user?.name,
+      });
+    } catch (error) {
+      res.sendServerError(error.message);
+    }
   }
 }

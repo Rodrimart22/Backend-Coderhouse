@@ -68,6 +68,10 @@ export default class Router {
       res.status(HTTP_STATUS.BAD_REQUEST).json({ error });
     };
 
+    res.sendNotAcceptable = (error) => {
+      res.status(HTTP_STATUS.NOT_ACCEPTABLE).json({ error });
+    };
+
     res.sendServerError = (error) => {
       res.status(HTTP_STATUS.SERVER_ERROR).json({ error });
     };
@@ -118,11 +122,12 @@ export default class Router {
       try {
         await callback.apply(this, params);
       } catch (error) {
-        params[1].status(HTTP_STATUS.SERVER_ERROR).json({
-          status: "error",
-          message: "Internal Server Error",
-          originalError: error.message,
-        });
+        console.error(error.message);
+        // params[1].status(HTTP_STATUS.SERVER_ERROR).json({
+        //   status: "error",
+        //   message: "Internal Server Error",
+        //   originalError: error.message,
+        // });
       }
     });
   }

@@ -1,12 +1,8 @@
-import { Users } from "../dao/factory.js";
-import UsersRepository from "../repositories/users.repository.js";
-import { Carts } from "../dao/factory.js";
-import CartsRepository from "../repositories/carts.repository.js";
-
-const UsersDao = new Users();
-const usersRepository = new UsersRepository(UsersDao);
-const CartsDao = new Carts();
-const cartsRepository = new CartsRepository(CartsDao);
+import {
+  cartsRepository,
+  usersRepository,
+} from "../repositories/factoryRepository.js";
+import { decodeToken } from "../utils.js";
 
 const registerUser = async (user) => {
   try {
@@ -17,6 +13,10 @@ const registerUser = async (user) => {
   } catch (error) {
     console.error(error.message);
   }
+};
+
+const updateUserPassword = async (jwt) => {
+  
 };
 
 export { registerUser };

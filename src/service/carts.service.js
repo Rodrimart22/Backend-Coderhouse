@@ -1,13 +1,9 @@
-import { Carts, Products } from "../dao/factory.js";
-import CartsRepository from "../repositories/carts.repository.js";
-import ProductsRepository from "../repositories/products.repository.js";
+import {
+  cartsRepository,
+  productsRepository,
+} from "../repositories/factoryRepository.js";
 import * as ticketsService from "./tickets.service.js";
 import mongoose from "mongoose";
-
-const CartsDao = new Carts();
-const cartsRepository = new CartsRepository(CartsDao);
-const ProductsDao = new Products();
-const productsRepository = new ProductsRepository(ProductsDao);
 
 // Add one product quantity or update quantity
 const addProduct = async (cid, pid, quantity = 0) => {

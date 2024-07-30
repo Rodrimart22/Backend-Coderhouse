@@ -8,7 +8,6 @@ program.parse();
 
 // //DEVELOPMENT, PRODUCTION
 const environment = program.opts().mode;
-console.log(environment);
 
 dotenv.config();
 
@@ -24,5 +23,7 @@ const config = {
   githubSecret: process.env.GITHUB_SECRET,
   persistence: process.env.PERSISTENCE,
   environment: environment ? environment : process.env.ENVIRONMENT,
+  userNodemailer: process.env.USER_NODEMAILER,
+  passwordNodemailer: process.env.PASSWORD_NODEMAILER,
 };
 export default config;

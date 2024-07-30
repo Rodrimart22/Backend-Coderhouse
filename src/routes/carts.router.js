@@ -32,7 +32,7 @@ export default class CartsRouter extends Router {
     // Purchase the cart of the user
     this.post(
       "/:cid/purchase",
-      [accessRolesEnum.USER],
+      [accessRolesEnum.USER,accessRolesEnum.PREMIUM, accessRolesEnum.PREMIUM],
       passportStrategiesEnum.JWT,
       cartPurchase
     );
@@ -40,7 +40,7 @@ export default class CartsRouter extends Router {
     // Update Cart with products
     this.put(
       "/:cid",
-      [accessRolesEnum.USER],
+      [accessRolesEnum.USER, accessRolesEnum.PREMIUM],
       passportStrategiesEnum.JWT,
       putProducts
     );
@@ -48,15 +48,15 @@ export default class CartsRouter extends Router {
     // Update one cart product quantity
     this.put(
       "/:cid/products/:pid",
-      [accessRolesEnum.USER],
+      [accessRolesEnum.USER, accessRolesEnum.PREMIUM],
       passportStrategiesEnum.JWT,
       addOneProduct
     );
 
     // Delete an specific cart to blank
-    this.put(
+    this.delete(
       "/:cid",
-      [accessRolesEnum.USER, accessRolesEnum.ADMIN],
+      [accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN],
       passportStrategiesEnum.JWT,
       deleteCart
     );
@@ -64,7 +64,7 @@ export default class CartsRouter extends Router {
     // Delete an specific product of a cart
     this.delete(
       "/:cid/products/:pid",
-      [accessRolesEnum.USER],
+      [accessRolesEnum.USER, accessRolesEnum.PREMIUM],
       passportStrategiesEnum.JWT,
       deleteProduct
     );

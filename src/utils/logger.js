@@ -80,7 +80,7 @@ if (config.environment === "DEVELOPMENT") {
 export const addLogger = (req, res, next) => {
   req.logger = logger;
   req.logger.http(
-    `${req.method} en ${req.url} - ${new Date().toLocaleDateString}`
+    `${req.method} en ${req.url} - ${new Date().toLocaleDateString()}`
   );
   next();
 };

@@ -13,9 +13,29 @@ const createHash = (password) =>
 const isValidPassword = (plainPassword, hashedPassword) =>
   bcrypt.compareSync(plainPassword, hashedPassword);
 
-const generateToken = (user) => {
-  const token = jwt.sign({ user }, configs.privateKeyJWT, { expiresIn: "24h" });
+const generateToken = (user, time = "24h") => {
+  const token = jwt.sign({ user }, configs.privateKeyJWT, { expiresIn: time });
   return token;
 };
 
-export { __dirname, createHash, isValidPassword, generateToken };
+const decodeToken = (token, req) => {
+  try {
+    const decodedToken = jwt.verify(token, configs.privateKeyJWT);
+    const expirationDate = new Date(decodedToken.exp * 1000);
+    const currentDate = new Date();
+
+    // req.logger.info(decodedToken);
+
+    if (currentDate < expirationDate) {
+      return decodedToken;
+    } else {
+      req.logger.error("El Token ha expirado");
+      return null;
+    }
+  } catch (error) {
+    req.logger.error("Error al decodificar/verificar el token");
+    console.error(error.message);
+  }
+};
+
+export { __dirname, createHash, isValidPassword, generateToken, decodeToken };

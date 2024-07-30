@@ -6,7 +6,7 @@ import {
   newProduct,
   updateProduct,
   getOne,
-  deleteProduct
+  deleteProduct,
 } from "../controllers/products.controller.js";
 
 export default class ProductsRouter extends Router {
@@ -18,39 +18,37 @@ export default class ProductsRouter extends Router {
     // get all product
     this.get(
       "/",
-      [accessRolesEnum.USER, accessRolesEnum.ADMIN],
+      [accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN],
       passportStrategiesEnum.JWT,
       getAll
     );
     // get one product
     this.get(
       "/:pid",
-      [accessRolesEnum.USER, accessRolesEnum.ADMIN],
+      [accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN],
       passportStrategiesEnum.JWT,
       getOne
     );
     // post a product
     this.post(
       "/",
-      [accessRolesEnum.ADMIN],
+      [accessRolesEnum.ADMIN, accessRolesEnum.PREMIUM],
       passportStrategiesEnum.JWT,
       newProduct
     );
     // Update a product data
     this.put(
       "/:pid",
-      [accessRolesEnum.ADMIN],
+      [accessRolesEnum.ADMIN, accessRolesEnum.PREMIUM],
       passportStrategiesEnum.JWT,
       updateProduct
     );
     // Delete a product data
     this.delete(
       "/:pid",
-      [accessRolesEnum.ADMIN],
+      [accessRolesEnum.ADMIN, accessRolesEnum.PREMIUM],
       passportStrategiesEnum.JWT,
       deleteProduct
     );
   }
 } // end
-
-

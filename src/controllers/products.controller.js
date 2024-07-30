@@ -1,8 +1,4 @@
-import { Products } from "../dao/factory.js";
-import ProductsRepository from "../repositories/products.repository.js";
-
-const ProductsDao = new Products();
-const productsRepository = new ProductsRepository(ProductsDao);
+import { productsRepository } from "../repositories/factoryRepository.js";
 
 // Get all products
 const getAll = async (req, res) => {
@@ -10,6 +6,7 @@ const getAll = async (req, res) => {
     const products = await productsRepository.getAllProducts();
     res.sendSuccess(products);
   } catch (error) {
+    req.logger.error(error.message);
     res.sendServerError(error.message);
   }
 };
@@ -20,6 +17,7 @@ const getOne = async (req, res) => {
     const product = await productsRepository.getOneProduct(pid);
     res.sendSuccess(product);
   } catch (error) {
+    req.logger.error(error.message);
     res.sendServerError(error.message);
   }
 };
@@ -57,10 +55,12 @@ const newProduct = async (req, res) => {
       stock,
       category,
       thumbnails,
+      owner: req.user.role == "PREMIUM" ? req.user.email : "ADMIN",
     });
 
     res.sendSuccess(result);
   } catch (error) {
+    req.logger.error(error.message);
     res.sendServerError(error.message);
   }
 };
@@ -88,8 +88,17 @@ const updateProduct = async (req, res) => {
       !stock ||
       !category
     ) {
+      req.logger.error("Update de productos con información incompleta");
       res.sendClientError("Imcomplete data");
     }
+    if (req.user.role == "PREMIUM") {
+      const product = await productsRepository.getOneProduct(pid);
+      if (product.owner !== req.user.email) {
+        req.logger.warning("No tienes permisos de modificar el producto.");
+        res.sendClientError("User Access are not valid for this product.");
+      }
+    }
+
     const result = await productsRepository.updateProduct(pid, {
       title,
       description,
@@ -111,9 +120,19 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     const { pid } = req.params;
+
+    if (req.user.role == "PREMIUM") {
+      const product = await productsRepository.getOneProduct(pid);
+      if (product.owner !== req.user.email) {
+        req.logger.warning("No tienes permisos de modificar el producto.");
+        res.sendClientError("User Access are not valid for this product.");
+      }
+    }
+
     const product = await productsRepository.deleteProduct(pid);
     res.sendSuccess(product);
   } catch (error) {
+    req.logger.error(error.message);
     res.sendServerError(error.message);
   }
 };
