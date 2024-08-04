@@ -67,6 +67,12 @@ export default class Router {
     res.sendClientError = (error) => {
       res.status(HTTP_STATUS.BAD_REQUEST).json({ error });
     };
+    res.sendUnauthorized = (error) => {
+      res.status(HTTP_STATUS.UNAUTHORIZED).json({ error });
+    };
+    res.sendNotFound = (error) => {
+      res.status(HTTP_STATUS.NOT_FOUND).json({ error });
+    };
 
     res.sendNotAcceptable = (error) => {
       res.status(HTTP_STATUS.NOT_ACCEPTABLE).json({ error });

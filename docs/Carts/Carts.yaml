@@ -1,0 +1,259 @@
+openapi: 3.0.0
+info:
+  title: Esquema de Carritos de Compra
+  description: Documentación Swagger para el esquema de carritos de compra
+  version: 1.0.0
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Id autogenerado por MongoDB Atlas, es el id del producto.
+        quantity:
+          type: number
+          description: Cantidad del producto en el carrito.
+          default: 1
+
+    Cart:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Id autogenerado por MongoDB Atlas, es el id del carrito.
+        products:
+          type: array
+          description: Array de productos almacenados en el carrito.
+          items:
+            $ref: "#/components/schemas/Product"
+      required:
+        - products
+
+    Ticket:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Código único del ticket.
+        purchase_datetime:
+          type: string
+          format: date-time
+          description: Fecha y hora de la compra del ticket en formato ISO 8601.
+        amount:
+          type: number
+          description: Monto del ticket.
+        purchaser:
+          type: string
+          description: Nombre del comprador del ticket.
+
+  requestBodies:
+    ProductsInCart:
+      type: object
+      properties:
+        products:
+          type: array
+          description: Array de productos almacenados en el carrito.
+          items:
+            $ref: "#/components/schemas/Product"
+      required:
+        - products
+
+paths:
+  # Get /carts/
+  /carts:
+    get:
+      summary: Obtener todos los carritos de compra
+      security:
+        - bearerAuth: []
+      tags:
+        - Carts
+      responses:
+        "200":
+          description: Listado de carritos de compra
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Cart"
+        "500":
+          description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
+
+  # Get /carts/:cid
+  /carts/{cid}:
+    get:
+      summary: Obtener un carrito de compra por ID
+      security:
+        - bearerAuth: []
+      tags:
+        - Carts
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          description: ID del carrito de compra a obtener.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Carrito encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+        "500":
+          description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
+
+    # Put /cart/:cid
+    put:
+      summary: Actualizar un carrito de compra por ID
+      security:
+        - bearerAuth: []
+      tags:
+        - Carts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/requestBodies/ProductsInCart"
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          description: ID del carrito de compra a obtener.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Carrito actualizado satisfactoriamente con listado de productos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+        "500":
+          description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
+
+    # Delete /cart/:cid
+    delete:
+      summary: Borrar el contenido de un carrito de compra por ID
+      security:
+        - bearerAuth: []
+      tags:
+        - Carts
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          description: ID del carrito de compra a obtener.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Contenido del carrito borrado satisfactoriamente.
+          content:
+            application/json:
+              type: object
+
+        "500":
+          description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
+
+  # post /carts/{cid}
+  /carts/{cid}/purchase:
+    post:
+      summary: Ejecutar orden de compra del carrito por ID.
+      security:
+        - bearerAuth: []
+      tags:
+        - Carts
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          description: ID del carrito de compra a obtener.
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Compra realizada con exito.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ticket"
+        "500":
+          description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
+
+  # put /:cid/products/:pid
+  /carts/{cid}/products/{pid}:
+    put:
+      summary: Ejecutar orden de compra del carrito por ID.
+      security:
+        - bearerAuth: []
+      tags:
+        - Carts
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          description: ID del carrito a obtener.
+          schema:
+            type: string
+        - in: path
+          name: pid
+          required: true
+          description: ID del producto a obtener.
+          requestBody:
+            required: false
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    quantity:
+                      type: number
+                      description: Cantidad opcional del producto a añadir al carrito.
+                example:
+                  quantity: 10
+
+      responses:
+        "201":
+          description: Producto añadido al carrito o cantidad del producto modificada satisfactoriamente.
+        "400":
+          description: Error ocasionado a multiples motivos 1.- Carrito o Producto no encontrado 2.- El dueño de un producto no lo puede añadir a su propio carrito
+        "500":
+          description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
+
+    # delete /:cid/products/:pid
+    delete:
+      summary: Borrar un producto por ID de un carrito por ID.
+      security:
+        - bearerAuth: []
+      tags:
+        - Carts
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          description: ID del carrito a obtener.
+          type: string
+        - in: path
+          name: pid
+          required: true
+          description: ID del producto a obtener.
+          type: string
+      responses:
+        "200":
+          description: Producto eliminado del carrito satisfactoriamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+              example: {}
+        "400":
+          description: Error del cliente ocasionado debido a que el Carrito o Producto no fueron encontrados.
+        "500":
+          description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.

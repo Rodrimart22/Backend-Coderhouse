@@ -2,12 +2,14 @@
 import express from "express";
 import handlebars from "express-handlebars";
 // import mongoose from "mongoose";
-import { __dirname } from "./utils.js";
+import { __dirname, __mainDirname } from "./utils.js";
 import initializePassport from "./config/passport.js";
 import passport from "passport";
 import configs from "./config/config.js";
-import { Server } from "socket.io";
+// import { Server } from "socket.io";
 import { addLogger } from "./utils/logger.js";
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerUiExpress from "swagger-ui-express";
 //imports of different routers
 import ViewsRouter from "./routes/views.router.js";
 import UsersRouter from "./routes/users.router.js";
@@ -22,6 +24,22 @@ console.log(`La aplicación se está ejecutando en el puerto ${configs.port}`);
 
 const app = express();
 app.use(addLogger);
+
+const swaggerOptions = {
+  definition: {
+    openapi: "3.0.1",
+    info: {
+      title: "Documentación de Tienda Virtual",
+      description:
+        "API enfocada en procesar las diferentes compras y contenido de la pagina virtual.",
+    },
+  },
+  apis: [`${__mainDirname}/docs/**/*.yaml`],
+};
+
+const specs = swaggerJsdoc(swaggerOptions);
+
+app.use("/api/docs", swaggerUiExpress.serve, swaggerUiExpress.setup(specs));
 
 const viewsRouter = new ViewsRouter();
 const usersRouter = new UsersRouter();
@@ -59,7 +77,7 @@ try {
 const server = app.listen(8080, () => console.log("Server running"));
 
 // Socket io
-const socketServer = new Server(server);
+// const socketServer = new Server(server);
 
 // socketServer.on("connection", (socket) => {
 //   socket.on("addMessage", async (data) => {

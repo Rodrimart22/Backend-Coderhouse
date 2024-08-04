@@ -59,21 +59,19 @@ const login = async (req, res) => {
     const user = await usersRepository.getUser(email);
 
     if (!user) {
-      return res.sendClientError("incorrect credentials");
+      return res.sendClientError("Credenciales incorrectas");
     }
 
     const comparePassword = isValidPassword(password, user.password);
 
     if (!comparePassword) {
-      return res.sendClientError("incorrect credentials");
+      return res.sendClientError("Credenciales incorrectas");
     }
 
     const accessToken = generateToken(user);
 
-    // res.sendSuccess(accessToken);
     res
       .cookie("jwt", accessToken, { httpOnly: true, maxAge: 3600000 })
-      // .redirect("/")
       .sendSuccess(accessToken);
   } catch (error) {
     res.sendServerError(error.message);
@@ -85,12 +83,13 @@ const updateRole = async (req, res) => {
     const user = await usersRepository.getUser(req.user.email);
 
     if (!user) {
-      throw CustomError.createError({
-        name: "UserError",
-        cause: "User not found",
-        message: "Error trying to update user access",
-        code: EErrors.USER_NOT_FOUND,
-      });
+      // throw CustomError.createError({
+      //   name: "UserError",
+      //   cause: "User not found",
+      //   message: "Error trying to update user access",
+      //   code: EErrors.USER_NOT_FOUND,
+      // });
+      res.sendNotFound("Usuario no encontrado");
     }
 
     const newRole = { role: user.role == "PREMIUM" ? "USER" : "PREMIUM" };
@@ -173,11 +172,11 @@ const updatePassword = async (req, res) => {
     req.logger.debug(user);
     if (!user) {
       req.logger.error("Token expired");
-      res.sendServerError("Token expired");
+      res.sendUnauthorized("Token expired");
     }
     const dbUser = await usersRepository.getUser(user.email);
     req.logger.debug(dbUser);
-    if (!dbUser) res.sendServerError("User not found");
+    if (!dbUser) res.sendNotFound("User not found");
     const isNew = isValidPassword(password, dbUser.password);
     if (isNew) {
       req.logger.error(

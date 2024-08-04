@@ -29,20 +29,28 @@ export default class CartsRouter extends Router {
       getOne
     );
 
-    // Purchase the cart of the user
-    this.post(
-      "/:cid/purchase",
-      [accessRolesEnum.USER,accessRolesEnum.PREMIUM, accessRolesEnum.PREMIUM],
-      passportStrategiesEnum.JWT,
-      cartPurchase
-    );
-
     // Update Cart with products
     this.put(
       "/:cid",
       [accessRolesEnum.USER, accessRolesEnum.PREMIUM],
       passportStrategiesEnum.JWT,
       putProducts
+    );
+    
+    // Delete an specific cart to blank
+    this.delete(
+      "/:cid",
+      [accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN],
+      passportStrategiesEnum.JWT,
+      deleteCart
+    );
+
+    // Purchase the cart of the user
+    this.post(
+      "/:cid/purchase",
+      [accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.PREMIUM],
+      passportStrategiesEnum.JWT,
+      cartPurchase
     );
 
     // Update one cart product quantity
@@ -53,13 +61,6 @@ export default class CartsRouter extends Router {
       addOneProduct
     );
 
-    // Delete an specific cart to blank
-    this.delete(
-      "/:cid",
-      [accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN],
-      passportStrategiesEnum.JWT,
-      deleteCart
-    );
 
     // Delete an specific product of a cart
     this.delete(

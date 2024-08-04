@@ -95,7 +95,7 @@ const updateProduct = async (req, res) => {
       const product = await productsRepository.getOneProduct(pid);
       if (product.owner !== req.user.email) {
         req.logger.warning("No tienes permisos de modificar el producto.");
-        res.sendClientError("User Access are not valid for this product.");
+        res.sendUnauthorized("User Access are not valid for this product.");
       }
     }
 
@@ -125,7 +125,7 @@ const deleteProduct = async (req, res) => {
       const product = await productsRepository.getOneProduct(pid);
       if (product.owner !== req.user.email) {
         req.logger.warning("No tienes permisos de modificar el producto.");
-        res.sendClientError("User Access are not valid for this product.");
+        res.sendUnauthorized("User Access are not valid for this product.");
       }
     }
 
