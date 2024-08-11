@@ -9,7 +9,7 @@ export default class Products {
     const products = await productsModel.find().lean();
     return products;
   };
-  
+
   getOne = async (id) => {
     const product = await productsModel.findOne({ _id: id });
     return product;

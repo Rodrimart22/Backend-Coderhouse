@@ -68,6 +68,7 @@ const login = async (req, res) => {
       return res.sendClientError("Credenciales incorrectas");
     }
 
+    // Actualizar para devolver jwt sin password
     const accessToken = generateToken(user);
 
     res

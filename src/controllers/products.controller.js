@@ -58,7 +58,8 @@ const newProduct = async (req, res) => {
       owner: req.user.role == "PREMIUM" ? req.user.email : "ADMIN",
     });
 
-    res.sendSuccess(result);
+    // req.logger.error(result);
+    res.sendSucessNewResource(result);
   } catch (error) {
     req.logger.error(error.message);
     res.sendServerError(error.message);
