@@ -123,7 +123,6 @@ export default class Router {
   };
 
   applyCallbacks(callbacks) {
-    //mapear los callbacks 1 a 1, obteniendo sus parametros (req,res)
     return callbacks.map((callback) => async (...params) => {
       try {
         await callback.apply(this, params);

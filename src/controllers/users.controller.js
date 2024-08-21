@@ -53,7 +53,6 @@ const login = async (req, res) => {
         message: "Error trying to create user",
         code: EErrors.INVALID_TYPE_ERROR,
       });
-      // return res.sendClientError("incomplete values");
     }
 
     const user = await usersRepository.getUser(email);
@@ -70,6 +69,9 @@ const login = async (req, res) => {
 
     // Actualizar para devolver jwt sin password
     const accessToken = generateToken(user);
+    await usersRepository.updateUser(user.email, {
+      last_connection: new Date().toISOString(),
+    });
 
     res
       .cookie("jwt", accessToken, { httpOnly: true, maxAge: 3600000 })
@@ -81,16 +83,24 @@ const login = async (req, res) => {
 
 const updateRole = async (req, res) => {
   try {
-    const user = await usersRepository.getUser(req.user.email);
+    const user = await usersRepository.getUserData(req.user.email);
 
     if (!user) {
-      // throw CustomError.createError({
-      //   name: "UserError",
-      //   cause: "User not found",
-      //   message: "Error trying to update user access",
-      //   code: EErrors.USER_NOT_FOUND,
-      // });
       res.sendNotFound("Usuario no encontrado");
+    }
+
+    if (user.role === "USER") {
+      const expectedDocuments = ["domicilio", "cuenta", "identificacion"];
+
+      // Obtener los nombres de los documentos del user
+      const userDocs = user.documents.map((obj) => obj.name);
+
+      for (const docName of expectedDocuments) {
+        if (!userDocs.includes(docName)) {
+          res.sendUnauthorized("Documentation not completed");
+          return;
+        }
+      }
     }
 
     const newRole = { role: user.role == "PREMIUM" ? "USER" : "PREMIUM" };
@@ -99,6 +109,44 @@ const updateRole = async (req, res) => {
       newRole
     );
     req.logger.info(`User updated to role: ${newRole.role}`);
+    res.sendSuccess(userUpdated);
+  } catch (error) {
+    res.sendServerError(error.message);
+  }
+};
+
+const updateDocuments = async (req, res) => {
+  try {
+    // Obtener datos del usuario y sus documentos
+    const user = await usersRepository.getUserData(req.user.email);
+    if (!user) {
+      res.sendNotFound("Usuario no encontrado");
+    }
+
+    const userDocuments = user.documents;
+
+    const documentsNames = [];
+    for (const fieldname in req.files) {
+      const file = req.files[fieldname][0];
+      documentsNames.push({ name: file.fieldname, reference: file.filename });
+    }
+    const combinedDocuments = [...documentsNames, ...userDocuments];
+
+    const uniqueDocuments = [];
+    for (const object of combinedDocuments) {
+      if (!uniqueDocuments.find((obj) => obj.name === object.name)) {
+        uniqueDocuments.push(object);
+      }
+    }
+
+    req.logger.info(uniqueDocuments);
+
+    const userUpdated = await usersRepository.updateUser(req.user.email, {
+      documents: [...uniqueDocuments],
+    });
+
+    // console.dir(userUpdated?.documents);
+    req.logger.info(`User updated: ${userUpdated?.documents}`);
     res.sendSuccess(userUpdated);
   } catch (error) {
     res.sendServerError(error.message);
@@ -204,4 +252,5 @@ export {
   logout,
   checkAndSend,
   updatePassword,
+  updateDocuments,
 };

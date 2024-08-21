@@ -69,7 +69,11 @@ try {
   app.use("/api/messages", messagesRouter.getRouter());
   app.use("/mockingproducts", mockingProductsRouter.getRouter());
   app.use("/loggerTest", loggerTestRouter.getRouter());
-  app.use(errorHandler);
+  app.use((err, req, res, next) => {
+    console.log(err.message);
+    res.status(500).send({ error: err.message });
+  });
+  // app.use(errorHandler);
 } catch (error) {
   console.error("Error en la configuración de las rutas:", error.message);
 }

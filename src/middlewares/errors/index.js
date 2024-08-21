@@ -43,12 +43,12 @@ export default (error, req, res, next) => {
         description: "Database error",
       });
       break;
-    default:
-      res.status(500).send({
-        status: "error",
-        error: error.name,
-        description: "Unexpected error",
-      });
+    // default:
+    //   res.status(500).send({
+    //     status: "error",
+    //     error: error.name,
+    //     description: "Unexpected error 2",
+    //   });
   }
 
   next();

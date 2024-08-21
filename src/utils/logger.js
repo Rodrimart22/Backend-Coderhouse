@@ -68,19 +68,9 @@ if (config.environment === "DEVELOPMENT") {
   });
 }
 
-// Creacion de logger
-// const logger = winston.createLogger({
-//   transports: [
-//     new winston.transports.Console({ leve: "http" }),
-//     new winston.transports.File({ filename: "./errors.log", level: "warn" }),
-//   ],
-// });
-
 // Logger como middleware
 export const addLogger = (req, res, next) => {
   req.logger = logger;
-  req.logger.http(
-    `${req.method} en ${req.url} - ${new Date().toLocaleDateString()}`
-  );
+  req.logger.http(`${req.method} en ${req.url} - ${new Date().toISOString()}`);
   next();
 };
