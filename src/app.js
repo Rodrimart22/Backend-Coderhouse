@@ -23,7 +23,8 @@ import cookieParser from "cookie-parser";
 
 console.log(`La aplicación se está ejecutando en el puerto ${configs.port}`);
 const allowedOrigins = [
- 
+  "http://localhost:5174",
+  "http://localhost:5173",
   "https://ecommercermartinez.netlify.app/",
 ];
 
