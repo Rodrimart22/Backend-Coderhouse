@@ -2,11 +2,9 @@ paths:
   # GET /api/products
   /api/products:
     get:
-      summary: Obtener listado de productos
+      summary: Obtener listado de productos. [PUBLIC]
       tags:
         - Products
-      security:
-        - bearerAuth: []
       responses:
         "200":
           description: Listado de productos obtenido exitosamente.
@@ -20,7 +18,7 @@ paths:
           description: Error interno del servidor.
     # POST /api/products
     post:
-      summary: Añadir un producto
+      summary: Añadir un producto. [PREMIUM, ADMIN]
       tags:
         - Products
       security:
@@ -46,7 +44,7 @@ paths:
   # GET /api/products/:pid
   /api/products/{pid}:
     get:
-      summary: Obtener un producto por su ID
+      summary: Obtener un producto por su ID. [PUBLIC]
       tags:
         - Products
       security:
@@ -70,7 +68,7 @@ paths:
 
     # PUT /api/products/:pid
     put:
-      summary: Actualizar un producto por su ID
+      summary: Actualizar un producto por su ID. [PREMIUM, ADMIN]
       tags:
         - Products
       security:
@@ -103,7 +101,7 @@ paths:
           description: Error interno del servidor.
     # DELETE /api/products/:pid
     delete:
-      summary: Eliminar un producto por su ID
+      summary: Eliminar un producto por su ID. [PREMIUM, ADMIN]
       tags:
         - Products
       security:

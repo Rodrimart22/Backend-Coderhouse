@@ -24,7 +24,7 @@ export default class CartsRouter extends Router {
     // Get One  cart
     this.get(
       "/:cid",
-      [accessRolesEnum.ADMIN],
+      [accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.ADMIN],
       passportStrategiesEnum.JWT,
       getOne
     );
@@ -36,7 +36,7 @@ export default class CartsRouter extends Router {
       passportStrategiesEnum.JWT,
       putProducts
     );
-    
+
     // Delete an specific cart to blank
     this.delete(
       "/:cid",
@@ -48,7 +48,7 @@ export default class CartsRouter extends Router {
     // Purchase the cart of the user
     this.post(
       "/:cid/purchase",
-      [accessRolesEnum.USER, accessRolesEnum.PREMIUM, accessRolesEnum.PREMIUM],
+      [accessRolesEnum.USER, accessRolesEnum.PREMIUM],
       passportStrategiesEnum.JWT,
       cartPurchase
     );
@@ -60,7 +60,6 @@ export default class CartsRouter extends Router {
       passportStrategiesEnum.JWT,
       addOneProduct
     );
-
 
     // Delete an specific product of a cart
     this.delete(

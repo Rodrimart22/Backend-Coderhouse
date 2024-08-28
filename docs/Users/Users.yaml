@@ -2,7 +2,7 @@ paths:
   # GET /api/users
   /api/users:
     get:
-      summary: Corrobora el funcionamiento básico de la API.
+      summary: Corrobora el funcionamiento básico de la API [PUBLIC].
       tags:
         - Users
       responses:
@@ -12,7 +12,7 @@ paths:
   # POST /api/users/login
   /api/users/login:
     post:
-      summary: Inicio de sesión de un usuario.
+      summary: Obtener el Cart ID del user [PUBLIC].
       tags:
         - Users
       requestBody:
@@ -20,28 +20,30 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#components/requestBodies/loginUser"
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - password
+            example:
+              token: "cd@coder.com"
+              password: "Coder12$"
       responses:
         "200":
-          description: Este servicio retorna el codigo JWT con valores no sensibles y lo setea como cookie.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                token:
-                  type: String
-              example:
-                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-        "400":
-          description: Credenciales proporcinadas incorrectas.
+          description: La API responde el carrito del token enviado.
+        "401":
+          description: No tienes autorización para hacer request a este endpoint.
         "500":
           description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
 
   # POST /api/users/register
   /api/users/register:
     post:
-      summary: Registro de un nuevo usuario.
+      summary: Registro de un nuevo usuario. [PUBLIC]
       tags:
         - Users
       requestBody:
@@ -63,10 +65,29 @@ paths:
         "500":
           description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
 
+  # GET /api/users/email
+  /api/users/email:
+    get:
+      summary: Obtener el Cart ID del user [USER, PREMIUM, ADMIN].
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+
+      responses:
+        "200":
+          description: La api responde el codigo del carrito registrado en el usuario del JWT.
+        "401":
+          description: No tienes autorización para hacer request a este endpoint a falta de JWT.
+        "404":
+          description: Usuario no encontrado.
+        "500":
+          description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
+
   # GET /api/users/premium/:uid
   /api/users/premium/{uid}:
     get:
-      summary: Actualización de role de usuario.
+      summary: Actualización de role de usuario a PREMIUM y viceversa [USER, PREMIUM].
       tags:
         - Users
       security:
@@ -99,28 +120,29 @@ paths:
                   name: Joaquin Gonzalez
                   email: ch@coder.com
                   role: PREMIUM
+        "401":
+          description: No autorizado, usualmente generado por falta de documentos en el usuario, falta de token en solicitud o role no admitido.
         "404":
           description: El correo o la contraseña son incorrectos.
         "500":
           description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
 
-
   # GET /api/users/logout
-  /api/users/logout:
-    get:
-      summary: Cierre de sesión del usuario.
-      tags:
-        - Users
-      responses:
-        "200":
-          description: La sesion se cerro correctamente.
-        "500":
-          description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
+  # /api/users/logout:
+  #   get:
+  #     summary: Cierre de sesión del usuario.
+  #     tags:
+  #       - Users
+  #     responses:
+  #       "200":
+  #         description: La sesion se cerro correctamente.
+  #       "500":
+  #         description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
 
   # POST /api/users/pass-recovery
   /api/users/pass-recovery:
     post:
-      summary: Creación de URL para cambio de contraseña.
+      summary: Creación de URL para cambio de contraseña [PUBLIC].
       tags:
         - Users
       requestBody:
@@ -147,7 +169,7 @@ paths:
   # POST /api/users/pass-update
   /api/users/pass-update:
     post:
-      summary: Cambio de contraseña del usuario.
+      summary: Cambio de contraseña del usuario [PUBLIC].
       tags:
         - Users
       requestBody:
@@ -179,6 +201,179 @@ paths:
         "500":
           description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
 
+  # POST /api/users/:uid/documents
+  /api/users/{uid}/documents:
+    post:
+      summary: Subir documentos de un usuario [USER, PREMIUM].
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                identificacion:
+                  type: string
+                  format: binary
+                  description: Archivo de identificación del usuario.
+                  contentMediaType: application/octet-stream
+                cuenta:
+                  type: string
+                  format: binary
+                  description: Archivo de cuenta del usuario.
+                  contentMediaType: application/octet-stream
+                domicilio:
+                  type: string
+                  format: binary
+                  description: Archivo de domicilio del usuario.
+                  contentMediaType: application/octet-stream
+                perfil:
+                  type: string
+                  format: binary
+                  description: Archivo de perfil del usuario.
+                  contentMediaType: application/octet-stream
+                producto:
+                  type: string
+                  format: binary
+                  description: Archivo de producto asociado.
+                  contentMediaType: application/octet-stream
+      responses:
+        "200":
+          description: El usuario fue actualizado exitosamente y los archivos enviados guardados.
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/Users"
+        "401":
+          description: No autorizado. No tienes acceso para realizar esta petición.
+        "404":
+          description: Usuario no encontrado
+        "500":
+          description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
+
+  # GET /api/users/all-users
+  /api/users/all-users:
+    get:
+      summary: Obtener la informacion basica de todos los usuarios [ADMIN].
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Retorna el name, email y role de todos los usuarios en la base de datos.
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/UsersDTO"
+        "401":
+          description: No autorizado. No tienes acceso para realizar esta petición.
+        "404":
+          description: Usuarios no encontrados.
+        "500":
+          description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
+
+  # PUT /api/users/update-role
+  /api/users/update-role:
+    put:
+      summary: Actualizar el rol de un usuario por su email. [ADMIN].
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                role:
+                  type: string
+              required:
+                - email
+                - role
+            example:
+              token: "cd@coder.com"
+              role: "ADMIN"
+      responses:
+        "200":
+          description: El rol del usuario a sido actualizado al deseado.
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/UsersDTO"
+        "400":
+          description: Informacion incompleta para realizar la peticion.
+        "401":
+          description: No autorizado. No tienes acceso para realizar esta petición.
+        "500":
+          description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
+
+  # DELETE /api/users/delete-user/:email
+  /api/users/delete-user/{email}:
+    delete:
+      summary: Borrar un usuario por su email. [ADMIN].
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+              required:
+                - email
+            example:
+              token: "cd@coder.com"
+              role: "ADMIN"
+      responses:
+        "200":
+          description: El rol del usuario a sido actualizado al deseado.
+          content:
+            application/json:
+              schema:
+                type: array
+                example: []
+
+        "400":
+          description: Informacion incompleta para realizar la peticion o usuario no encontrado.
+        "401":
+          description: No autorizado. No tienes acceso para realizar esta petición.
+        "500":
+          description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
+
+  # DELETE /api/users/no-active
+  /api/users/no-active:
+    delete:
+      summary: Borrar todos los usuarios con más de 2 días de inactividad y les notifica por correo. [ADMIN].
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Todos los usuarios inactivos fueron eliminados con exito y recibieron notificación de su eliminación de cuenta.
+        "401":
+          description: No autorizado. No tienes acceso para realizar esta petición.
+        "500":
+          description: Error interno del servidor, usualmente generado por una query defectuosa o fallo durante la transacción.
+
+# Componentes
 components:
   schemas:
     Users:
@@ -209,6 +404,19 @@ components:
         cart_id:
           type: string
           description: ID autogenerado del carrito asignado al usuario.
+    UsersDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre completo del usuario.
+        email:
+          type: string
+          description: Correo del usuario.
+        role:
+          type: string
+          description: Rol del usuario.
+          enum: ["ADMIN", "USER", "PREMIUM"]
 
   requestBodies:
     loginUser:

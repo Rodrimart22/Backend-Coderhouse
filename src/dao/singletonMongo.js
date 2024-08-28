@@ -50,10 +50,10 @@ export default class MongoSingleton {
     while (!connected && retries < maxRetries) {
       try {
         await mongoose.connect(config.mongoUrl);
+        // Configuracion deprecada y causaba warnings
         // , {
         //   useNewUrlParser: true,
         //   useUnifiedTopology: true,
-        //   // Otras opciones de configuración aquí según sea necesario
         // });
         connected = true;
         console.log("Conexión exitosa a la base de datos.");

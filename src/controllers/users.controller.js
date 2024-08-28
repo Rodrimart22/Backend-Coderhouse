@@ -11,12 +11,15 @@ import CustomError from "../middlewares/errors/CustomError.js";
 import { usersRepository } from "../repositories/factoryRepository.js";
 import { sendEmail } from "../service/mail.service.js";
 import { changePasswordHtml } from "../utils/changePassword.html.js";
+import { accountDeletedHtml } from "../utils/accountDeleted.html.js";
+import mongoose from "mongoose";
 
+// Register a new user
 const register = async (req, res) => {
   try {
-    const { first_name, last_name, role, email, password } = req.body;
+    const { first_name, last_name, email, password } = req.body;
 
-    if (!first_name || !last_name || !role || !email || !password) {
+    if (!first_name || !last_name || !email || !password) {
       return res.sendClientError("incomplete values");
     }
 
@@ -42,6 +45,7 @@ const register = async (req, res) => {
   }
 };
 
+// Process to login an existing user
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -81,6 +85,7 @@ const login = async (req, res) => {
   }
 };
 
+// Process to update user role to premium
 const updateRole = async (req, res) => {
   try {
     const user = await usersRepository.getUserData(req.user.email);
@@ -115,6 +120,7 @@ const updateRole = async (req, res) => {
   }
 };
 
+// Process to update and save a document from the user.
 const updateDocuments = async (req, res) => {
   try {
     // Obtener datos del usuario y sus documentos
@@ -177,6 +183,7 @@ const logout = async (req, res) => {
   });
 };
 
+// Process to send password change email.
 const checkAndSend = async (req, res) => {
   try {
     const { email } = req.body;
@@ -214,6 +221,7 @@ const checkAndSend = async (req, res) => {
   }
 };
 
+// Process to update password by received email
 const updatePassword = async (req, res) => {
   try {
     const { token, password } = req.body;
@@ -244,6 +252,102 @@ const updatePassword = async (req, res) => {
   }
 };
 
+// Process to update user password
+const updateUser = async (req, res) => {
+  try {
+    const { email, role } = req.body;
+    if (!email || !role) res.sendClientError("No user found");
+    const user = await usersRepository.updateUser(email, { role: role });
+    res.sendSuccess(user);
+  } catch (error) {
+    req.logger.error(error.message);
+    res.sendServerError(error.message);
+  }
+};
+
+// Get all users
+const getAllUsers = async (req, res) => {
+  try {
+    const allUsers = await usersRepository.getAllUsers();
+
+    if (!allUsers) {
+      return res.sendClientError("No Users found");
+    }
+
+    res.sendSuccess(allUsers);
+  } catch (error) {
+    req.logger.error(error.message);
+    res.sendServerError(error.message);
+  }
+};
+
+// Delete inactive users
+const deleteNoActive = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const oldUsers = await usersRepository.getOldUsers();
+
+    if (oldUsers.length === 0) {
+      res.sendSuccess("No se encontraron usuarios inactivos.");
+      return;
+    }
+
+    const emailPromises = oldUsers.map(async (user) => {
+      const accountDeleted = {
+        to: user.email,
+        subject: "Eliminado por Inactividad",
+        html: accountDeletedHtml(),
+      };
+
+      await sendEmail(accountDeleted);
+      await usersRepository.deleteUser(user.email);
+      return;
+    });
+    await Promise.all(emailPromises);
+
+    req.logger.info("Correo enviado a todos los usuarios");
+
+    await session.commitTransaction();
+
+    res.sendSuccess("Usuarios inactivos eliminados");
+  } catch (error) {
+    await session.abortTransaction();
+
+    req.logger.error(error.message);
+    res.sendServerError(error.message);
+  } finally {
+    session?.endSession();
+  }
+};
+
+// Delete user by email
+const deleteUser = async (req, res) => {
+  try {
+    const { email } = req.params;
+    if (!email) res.sendNotFound("No user found");
+    const user = await usersRepository.deleteUser(email);
+    res.sendSuccess(user);
+  } catch (error) {
+    req.logger.error(error.message);
+    res.sendServerError(error.message);
+  }
+};
+
+// Get user by email
+const getCartByEmail = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) res.sendNotFound("No user found");
+    const userData = await usersRepository.getUserData(user.email);
+    res.sendSuccess(userData.cart_id);
+  } catch (error) {
+    req.logger.error(error.message);
+    res.sendServerError(error.message);
+  }
+};
+
 export {
   register,
   login,
@@ -253,4 +357,9 @@ export {
   checkAndSend,
   updatePassword,
   updateDocuments,
+  getAllUsers,
+  deleteNoActive,
+  deleteUser,
+  updateUser,
+  getCartByEmail,
 };

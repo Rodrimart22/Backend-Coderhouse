@@ -5,6 +5,16 @@ export default class Users {
     console.log("Working users with DB");
   }
 
+  getAllUsers = async () => {
+    const user = await usersModel.find();
+    return user;
+  };
+
+  getOldUsers = async (date) => {
+    const result = await usersModel.find({ last_connection: { $lt: date } });
+    return result;
+  };
+
   getByEmail = async (email) => {
     const user = await usersModel.findOne({ email }).lean();
     return user;
@@ -17,6 +27,21 @@ export default class Users {
 
   save = async (user) => {
     const result = await usersModel.create(user);
+    return result;
+  };
+
+  deleteByEmail = async (email) => {
+    const user = await usersModel.deleteOne({ email }).lean();
+    return user;
+  };
+
+  deleteOldUsers = async (date) => {
+    const result = await usersModel.deleteMany({
+      $or: [
+        { last_connection: { $lt: date } }, 
+        { last_connection: { $exists: false } }, 
+      ],
+    });
     return result;
   };
 }

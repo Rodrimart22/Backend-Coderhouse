@@ -4,6 +4,8 @@ import {
 } from "../repositories/factoryRepository.js";
 import { addProduct, purchase } from "../service/carts.service.js";
 
+
+// Get All carts
 const getAll = async (req, res) => {
   try {
     const cart = await cartsRepository.getAll();
@@ -13,6 +15,8 @@ const getAll = async (req, res) => {
     res.sendServerError(error.message);
   }
 };
+
+// Get one cart by id
 const getOne = async (req, res) => {
   try {
     const { cid } = req.params;
@@ -24,6 +28,7 @@ const getOne = async (req, res) => {
   }
 };
 
+// Create a new empty cart
 const save = async (req, res) => {
   try {
     const result = await cartsRepository.save();
@@ -33,6 +38,7 @@ const save = async (req, res) => {
   }
 };
 
+// Run shopping process of the cart
 const cartPurchase = async (req, res) => {
   try {
     const { cid } = req.params;
@@ -78,8 +84,9 @@ const addOneProduct = async (req, res) => {
       res.sendClientError("You can't add your own products");
     }
 
-    const result = addProduct(cid, pid, quantity);
-    res.sendSuccess("Producto modificado correctamente", result);
+    const result = await addProduct(cid, pid, quantity);
+    res.sendSuccess(result);
+    // res.sendSuccess(`Producto modificado correctamente ${result}`);
   } catch (error) {
     req.logger.error(error.message);
     res.sendServerError("Error en controller", error.message);

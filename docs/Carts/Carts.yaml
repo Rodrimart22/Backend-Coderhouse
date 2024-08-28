@@ -61,10 +61,10 @@ components:
         - products
 
 paths:
-  # Get /carts/
-  /carts:
+  # Get /api/carts/
+  /api/carts:
     get:
-      summary: Obtener todos los carritos de compra
+      summary: Obtener todos los carritos de compra. [ADMIN]
       security:
         - bearerAuth: []
       tags:
@@ -81,10 +81,10 @@ paths:
         "500":
           description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
 
-  # Get /carts/:cid
-  /carts/{cid}:
+  # Get /api/carts/:cid
+  /api/carts/{cid}:
     get:
-      summary: Obtener un carrito de compra por ID
+      summary: Obtener un carrito de compra por ID. [USER, PREMIUM, ADMIN]
       security:
         - bearerAuth: []
       tags:
@@ -106,9 +106,9 @@ paths:
         "500":
           description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
 
-    # Put /cart/:cid
+    # Put /api/cart/:cid
     put:
-      summary: Actualizar un carrito de compra por ID
+      summary: Actualizar un carrito de compra por ID. [USER, PREMIUM]
       security:
         - bearerAuth: []
       tags:
@@ -137,9 +137,9 @@ paths:
         "500":
           description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
 
-    # Delete /cart/:cid
+    # Delete /api/cart/:cid
     delete:
-      summary: Borrar el contenido de un carrito de compra por ID
+      summary: Borrar el contenido de un carrito de compra por ID. [USER, PREMIUM, ADMIN]
       security:
         - bearerAuth: []
       tags:
@@ -161,10 +161,10 @@ paths:
         "500":
           description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
 
-  # post /carts/{cid}
-  /carts/{cid}/purchase:
+  # post /api/carts/{cid}
+  /api/carts/{cid}/purchase:
     post:
-      summary: Ejecutar orden de compra del carrito por ID.
+      summary: Ejecutar orden de compra del carrito por ID. [USER, PREMIUM]
       security:
         - bearerAuth: []
       tags:
@@ -186,10 +186,10 @@ paths:
         "500":
           description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
 
-  # put /:cid/products/:pid
-  /carts/{cid}/products/{pid}:
+  # put /api/carts/:cid/products/:pid
+  /api/carts/{cid}/products/{pid}:
     put:
-      summary: Ejecutar orden de compra del carrito por ID.
+      summary: Actualizar la cantidad de un producto en el carrito de compra o añadirlo. [USER, PREMIUM].
       security:
         - bearerAuth: []
       tags:
@@ -215,20 +215,21 @@ paths:
                     quantity:
                       type: number
                       description: Cantidad opcional del producto a añadir al carrito.
+                      default: 1
                 example:
                   quantity: 10
 
       responses:
-        "201":
+        "200":
           description: Producto añadido al carrito o cantidad del producto modificada satisfactoriamente.
         "400":
           description: Error ocasionado a multiples motivos 1.- Carrito o Producto no encontrado 2.- El dueño de un producto no lo puede añadir a su propio carrito
         "500":
           description: Error interno del servidor, usualmente generado por una query defectuosa o fallo en la conexión.
 
-    # delete /:cid/products/:pid
+    # delete /api/carts/:cid/products/:pid
     delete:
-      summary: Borrar un producto por ID de un carrito por ID.
+      summary: Borrar un producto por ID de un carrito por ID. [USER, PREMIUM]
       security:
         - bearerAuth: []
       tags:

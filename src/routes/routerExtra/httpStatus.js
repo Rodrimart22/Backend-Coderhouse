@@ -1,3 +1,4 @@
+// Used to magnage different http responses.
 export const HTTP_STATUS = {
   OK: 200,
   CREATED: 201,
@@ -24,5 +25,5 @@ export const HTTP_STATUS = {
   NOT_IMPLEMENTED: 501,
   BAD_GATEWAY: 502,
   SERVICE_UNAVAILABLE: 503,
-  GATEWAY_TIMEOUT: 504
+  GATEWAY_TIMEOUT: 504,
 };

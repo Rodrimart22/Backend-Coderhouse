@@ -11,10 +11,6 @@ const environment = program.opts().mode;
 
 dotenv.config();
 
-// dotenv.config({
-//   path: (environment === "DEVELOPMENT") ? "./.env.dev" : "./.env.prod",
-// });
-
 const config = {
   port: process.env.PORT,
   mongoUrl: process.env.MONGO_URL,

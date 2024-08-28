@@ -42,7 +42,11 @@ const userSchema = new mongoose.Schema({
   },
   last_connection: {
     type: Date,
-    default: new Date().toISOString(),
+    default: function () {
+      const offset = new Date().getTimezoneOffset();
+      const localTime = new Date(Date.now() - offset * 60000);
+      return localTime.toISOString();
+    },
   },
 });
 

@@ -1,6 +1,7 @@
 // Imports of express configuration
 import express from "express";
 import handlebars from "express-handlebars";
+import cors from "cors";
 // import mongoose from "mongoose";
 import { __dirname, __mainDirname } from "./utils.js";
 import initializePassport from "./config/passport.js";
@@ -17,10 +18,15 @@ import ProductsRouter from "./routes/products.router.js";
 import CartsRouter from "./routes/carts.router.js";
 import MessagesRouter from "./routes/messages.router.js";
 import MockingProductsRouter from "./routes/mockingproduct.router.js";
-import errorHandler from "./middlewares/errors/index.js";
 import LoggerTestRouter from "./routes/loggerTest.router.js";
+import cookieParser from "cookie-parser";
 
 console.log(`La aplicación se está ejecutando en el puerto ${configs.port}`);
+const allowedOrigins = [
+  "http://localhost:5174",
+  "http://localhost:5173",
+  "https://front-backend.netlify.app",
+];
 
 const app = express();
 app.use(addLogger);
@@ -49,12 +55,12 @@ const messagesRouter = new MessagesRouter();
 const mockingProductsRouter = new MockingProductsRouter();
 const loggerTestRouter = new LoggerTestRouter();
 
+app.use(cookieParser());
 initializePassport();
 app.use(passport.initialize());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use(express.static(`${__dirname}/public`));
 
 app.engine("handlebars", handlebars.engine());
@@ -62,6 +68,12 @@ app.set("views", `${__dirname}/views`);
 app.set("view engine", "handlebars");
 
 try {
+  app.use(
+    cors({
+      origin: allowedOrigins,
+      optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+    })
+  );
   app.use("/", viewsRouter.getRouter());
   app.use("/api/carts", cartsRouter.getRouter());
   app.use("/api/products", productsRouter.getRouter());

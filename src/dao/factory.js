@@ -13,22 +13,27 @@ switch (persistence) {
     //Import dinámicos de Conexion con DB y Clases Mongo.
     const { default: mongo } = await import("./singletonMongo.js");
     mongo.getInstance();
+    // Import carts
     const { default: CartsMongo } = await import(
       "./dbManagers/carts.manager.js"
     );
     Carts = CartsMongo;
+    //import products
     const { default: ProductsMongo } = await import(
       "./dbManagers/products.manager.js"
     );
     Products = ProductsMongo;
+    //import users
     const { default: UsersMongo } = await import(
       "./dbManagers/users.manager.js"
     );
     Users = UsersMongo;
+    //import messages
     const { default: MessagesMongo } = await import(
       "./dbManagers/messages.manager.js"
     );
     Messages = MessagesMongo;
+    //import tickets
     const { default: TicketsMongo } = await import(
       "./dbManagers/tickets.manager.js"
     );

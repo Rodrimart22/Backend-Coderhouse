@@ -1,4 +1,5 @@
 import { productsRepository } from "../repositories/factoryRepository.js";
+import { sendEmail } from "../service/mail.service.js";
 
 // Get all products
 const getAll = async (req, res) => {
@@ -121,17 +122,26 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     const { pid } = req.params;
+    const product = await productsRepository.getOneProduct(pid);
 
     if (req.user.role == "PREMIUM") {
-      const product = await productsRepository.getOneProduct(pid);
       if (product.owner !== req.user.email) {
         req.logger.warning("No tienes permisos de modificar el producto.");
         res.sendUnauthorized("User Access are not valid for this product.");
       }
     }
 
-    const product = await productsRepository.deleteProduct(pid);
-    res.sendSuccess(product);
+    if(product?.owner !== "ADMIN"){
+      const accountDeleted = {
+        to: product.owner,
+        subject: "Producto Eliminado",
+        html: deleteProduct(product.title),
+      };
+      await sendEmail(accountDeleted);
+    }
+
+    const deletedProduct = await productsRepository.deleteProduct(pid);
+    res.sendSuccess(deletedProduct);
   } catch (error) {
     req.logger.error(error.message);
     res.sendServerError(error.message);

@@ -1,5 +1,6 @@
 import { messagesRepository } from "../repositories/factoryRepository.js";
 
+// Get all messages 
 const getAll = async (req, res) => {
   try {
     const result = await messagesRepository.getAll();
@@ -9,6 +10,7 @@ const getAll = async (req, res) => {
   }
 };
 
+// Save a new message
 const saveMessage = async (req, res) => {
   try {
     const name = req.user.name;

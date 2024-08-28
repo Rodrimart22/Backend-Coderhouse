@@ -8,10 +8,10 @@ import mongoose from "mongoose";
 // Add one product quantity or update quantity
 const addProduct = async (cid, pid, quantity = 0) => {
   try {
-    const result =
-      quantity === 0
-        ? await cartsRepository.addOneProduct(cid, pid)
-        : await cartsRepository.putQuantity(cid, pid, quantity);
+    let result = await cartsRepository.addOneProduct(cid, pid);
+    if (quantity > 1) {
+      result = await cartsRepository.putQuantity(cid, pid, quantity);
+    }
 
     return result;
   } catch (error) {

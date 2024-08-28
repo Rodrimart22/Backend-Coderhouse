@@ -16,6 +16,7 @@ const initializePassport = () => {
     new JWTSrategy(
       {
         jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+        // jwtFromRequest: ExtractJWT.fromExtractors([cookieExtractor]),
         secretOrKey: configs.privateKeyJWT,
       },
       async (jwt_payload, done) => {
@@ -68,15 +69,14 @@ const initializePassport = () => {
     )
   );
 
-  //Serializaccion y DeSerializaccion
-  passport.serializeUser((user, done) => {
-    done(null, user._id);
-  });
+};
 
-  passport.deserializeUser(async (id, done) => {
-    const user = await usersModel.findById(id);
-    done(null, user);
-  });
+const cookieExtractor = (req) => {
+  let token = null;
+  if (req && req.cookies) {
+    token = req.cookies["jwt"];
+  }
+  return token;
 };
 
 export default initializePassport;
