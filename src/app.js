@@ -24,7 +24,7 @@ import cookieParser from "cookie-parser";
 console.log(`La aplicación se está ejecutando en el puerto ${configs.port}`);
 const allowedOrigins = [
  
-  "https://front-backend.netlify.app",
+  "https://ecommercermartinez.netlify.app/",
 ];
 
 const app = express();
