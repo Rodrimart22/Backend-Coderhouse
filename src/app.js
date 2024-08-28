@@ -25,7 +25,7 @@ console.log(`La aplicación se está ejecutando en el puerto ${configs.port}`);
 const allowedOrigins = [
   "http://localhost:5174",
   "http://localhost:5173",
-  "https://front-backend.netlify.app",
+  "https://ecommercermartinez.netlify.app/",
 ];
 
 const app = express();
