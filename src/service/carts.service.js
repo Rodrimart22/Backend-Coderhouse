@@ -1,16 +1,14 @@
-import {
-  cartsRepository,
-  productsRepository,
-} from "../repositories/factoryRepository.js";
+import CartsRepository from "../repositories/carts.repository.js";
+import ProductsRepository from "../repositories/products.repository.js";
 import * as ticketsService from "./tickets.service.js";
 import mongoose from "mongoose";
 
 // Add one product quantity or update quantity
 const addProduct = async (cid, pid, quantity = 0) => {
   try {
-    let result = await cartsRepository.addOneProduct(cid, pid);
+    let result = await CartsRepository.addOneProduct(cid, pid);
     if (quantity > 1) {
-      result = await cartsRepository.putQuantity(cid, pid, quantity);
+      result = await CartsRepository.putQuantity(cid, pid, quantity);
     }
 
     return result;
@@ -27,7 +25,7 @@ const purchase = async (cid, user) => {
     session = await mongoose.startSession();
     session.startTransaction();
 
-    const cart = await cartsRepository.getOne(cid);
+    const cart = await CartsRepository.getOne(cid);
 
     if (!cart || !cart.products || cart.products.length === 0) {
       console.error("Error en Carts service - Carrito no encontrado o vacío");
@@ -37,12 +35,12 @@ const purchase = async (cid, user) => {
     const operations = await Promise.all(
       cart.products.map(async ({ product, quantity }) => {
         try {
-          const productData = await productsRepository.getOneProduct(product);
+          const productData = await ProductsRepository.getOneProduct(product);
           // console.log("Product data:", productData);
 
           if (productData.stock >= quantity) {
             productData.stock -= quantity;
-            await productsRepository.updateProduct(product, {
+            await ProductsRepository.updateProduct(product, {
               stock: productData.stock,
             });
             return quantity * productData.price;
@@ -63,7 +61,7 @@ const purchase = async (cid, user) => {
 
     const ticket = await ticketsService.generatePurchase(user, amount);
 
-    await cartsRepository.putProducts(cid, outStock);
+    await CartsRepository.putProducts(cid, outStock);
     await session.commitTransaction();
 
     return ticket;
