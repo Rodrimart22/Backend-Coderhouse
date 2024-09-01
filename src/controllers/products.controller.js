@@ -1,10 +1,10 @@
-import { productsRepository } from "../repositories/factoryRepository.js";
+import ProductsRepository from "../repositories/products.repository.js";
 import { sendEmail } from "../service/mail.service.js";
 
 // Get all products
 const getAll = async (req, res) => {
   try {
-    const products = await productsRepository.getAllProducts();
+    const products = await ProductsRepository.getAllProducts();
     res.sendSuccess(products);
   } catch (error) {
     req.logger.error(error.message);
@@ -15,7 +15,7 @@ const getAll = async (req, res) => {
 const getOne = async (req, res) => {
   try {
     const { pid } = req.params;
-    const product = await productsRepository.getOneProduct(pid);
+    const product = await ProductsRepository.getOneProduct(pid);
     res.sendSuccess(product);
   } catch (error) {
     req.logger.error(error.message);
@@ -47,7 +47,7 @@ const newProduct = async (req, res) => {
       res.sendClientError("Incomplete data");
     }
 
-    const result = await productsRepository.createProduct({
+    const result = await ProductsRepository.createProduct({
       title,
       description,
       code,
@@ -94,14 +94,14 @@ const updateProduct = async (req, res) => {
       res.sendClientError("Imcomplete data");
     }
     if (req.user.role == "PREMIUM") {
-      const product = await productsRepository.getOneProduct(pid);
+      const product = await ProductsRepository.getOneProduct(pid);
       if (product.owner !== req.user.email) {
         req.logger.warning("No tienes permisos de modificar el producto.");
         res.sendUnauthorized("User Access are not valid for this product.");
       }
     }
 
-    const result = await productsRepository.updateProduct(pid, {
+    const result = await ProductsRepository.updateProduct(pid, {
       title,
       description,
       code,
@@ -122,7 +122,7 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     const { pid } = req.params;
-    const product = await productsRepository.getOneProduct(pid);
+    const product = await ProductsRepository.getOneProduct(pid);
 
     if (req.user.role == "PREMIUM") {
       if (product.owner !== req.user.email) {
@@ -140,7 +140,7 @@ const deleteProduct = async (req, res) => {
       await sendEmail(accountDeleted);
     }
 
-    const deletedProduct = await productsRepository.deleteProduct(pid);
+    const deletedProduct = await ProductsRepository.deleteProduct(pid);
     res.sendSuccess(deletedProduct);
   } catch (error) {
     req.logger.error(error.message);

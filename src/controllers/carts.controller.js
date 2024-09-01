@@ -1,14 +1,12 @@
-import {
-  cartsRepository,
-  productsRepository,
-} from "../repositories/factoryRepository.js";
+import CartsRepository from "../repositories/carts.repository.js";
+import ProductsRepository from "../repositories/products.repository.js";
 import { addProduct, purchase } from "../service/carts.service.js";
 
 
 // Get All carts
 const getAll = async (req, res) => {
   try {
-    const cart = await cartsRepository.getAll();
+    const cart = await CartsRepository.getAll();
     res.sendSuccess(cart);
   } catch (error) {
     req.logger.error(error.message);
@@ -20,7 +18,7 @@ const getAll = async (req, res) => {
 const getOne = async (req, res) => {
   try {
     const { cid } = req.params;
-    const cart = await cartsRepository.getOne(cid);
+    const cart = await CartsRepository.getOne(cid);
     res.sendSuccess(cart);
   } catch (error) {
     req.logger.error(error.message);
@@ -31,7 +29,7 @@ const getOne = async (req, res) => {
 // Create a new empty cart
 const save = async (req, res) => {
   try {
-    const result = await cartsRepository.save();
+    const result = await CartsRepository.save();
     res.sendSucessNewResource(result);
   } catch (error) {
     res.sendServerError(error.message);
@@ -58,7 +56,7 @@ const putProducts = async (req, res) => {
     if (!products) {
       res.sendClientError("No products received");
     }
-    const result = await cartsRepository.putProducts(cid, products);
+    const result = await CartsRepository.putProducts(cid, products);
     res.sendSucessNewResource(result);
   } catch (error) {
     req.logger.error(error.message);
@@ -71,8 +69,8 @@ const addOneProduct = async (req, res) => {
   try {
     const { cid, pid } = req.params;
     const { quantity = 0 } = req.body;
-    const cart = await cartsRepository.getOne(cid);
-    const product = await productsRepository.getOneProduct(pid);
+    const cart = await CartsRepository.getOne(cid);
+    const product = await ProductsRepository.getOneProduct(pid);
 
     if (!cart || !product) {
       res.logger.info("Cart or product not found");
@@ -98,13 +96,13 @@ const putQuantity = async (req, res) => {
   try {
     const { cid, pid } = req.params;
     const { quantity } = req.body;
-    const cart = await cartsRepository.getOne(cid);
-    const product = await productsRepository.getOneProduct(pid);
+    const cart = await CartsRepository.getOne(cid);
+    const product = await ProductsRepository.getOneProduct(pid);
 
     if (!quantity || !cart || !product) {
       res.sendClientError("Cart or product not found");
     }
-    const result = cartsRepository.putQuantity(cid, pid, quantity);
+    const result = CartsRepository.putQuantity(cid, pid, quantity);
     res.sendSuccess("", result);
   } catch (error) {
     req.logger.error(error.message);
@@ -116,12 +114,12 @@ const putQuantity = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     const { cid, pid } = req.params;
-    const cart = cartsRepository.getOne(cid);
-    const product = await productsRepository.getOneProduct(pid);
+    const cart = CartsRepository.getOne(cid);
+    const product = await ProductsRepository.getOneProduct(pid);
     if (!cart || !product) {
       res.sendClientError("Cart or Product not found");
     }
-    const result = cartsRepository.deleteProduct(cid, pid);
+    const result = CartsRepository.deleteProduct(cid, pid);
     res.sendSuccess(result);
   } catch (error) {
     req.logger.error(error.message);
@@ -133,7 +131,7 @@ const deleteProduct = async (req, res) => {
 const deleteCart = async (req, res) => {
   try {
     const { cid } = req.params;
-    const result = cartsRepository.clearCart(cid);
+    const result = CartsRepository.clearCart(cid);
     res.sendSuccess(result);
   } catch (error) {
     req.logger.error(error.message);

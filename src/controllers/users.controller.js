@@ -8,7 +8,7 @@ import { registerUser } from "../service/users.service.js";
 import EErrors from "../middlewares/errors/enums.js";
 import CustomError from "../middlewares/errors/CustomError.js";
 
-import { usersRepository } from "../repositories/factoryRepository.js";
+import UsersRepository from "../users.repository.js";
 import { sendEmail } from "../service/mail.service.js";
 import { changePasswordHtml } from "../utils/changePassword.html.js";
 import { accountDeletedHtml } from "../utils/accountDeleted.html.js";
@@ -23,7 +23,7 @@ const register = async (req, res) => {
       return res.sendClientError("incomplete values");
     }
 
-    const existsUser = await usersRepository.getUser(email);
+    const existsUser = await UsersRepository.getUser(email);
 
     if (existsUser) {
       return res.sendClientError("user already exists");
@@ -59,7 +59,7 @@ const login = async (req, res) => {
       });
     }
 
-    const user = await usersRepository.getUser(email);
+    const user = await UsersRepository.getUser(email);
 
     if (!user) {
       return res.sendClientError("Credenciales incorrectas");
@@ -73,7 +73,7 @@ const login = async (req, res) => {
 
     // Actualizar para devolver jwt sin password
     const accessToken = generateToken(user);
-    await usersRepository.updateUser(user.email, {
+    await UsersRepository.updateUser(user.email, {
       last_connection: new Date().toISOString(),
     });
 
@@ -88,7 +88,7 @@ const login = async (req, res) => {
 // Process to update user role to premium
 const updateRole = async (req, res) => {
   try {
-    const user = await usersRepository.getUserData(req.user.email);
+    const user = await UsersRepository.getUserData(req.user.email);
 
     if (!user) {
       res.sendNotFound("Usuario no encontrado");
@@ -109,7 +109,7 @@ const updateRole = async (req, res) => {
     }
 
     const newRole = { role: user.role == "PREMIUM" ? "USER" : "PREMIUM" };
-    const userUpdated = await usersRepository.updateUser(
+    const userUpdated = await UsersRepository.updateUser(
       req.user.email,
       newRole
     );
@@ -124,7 +124,7 @@ const updateRole = async (req, res) => {
 const updateDocuments = async (req, res) => {
   try {
     // Obtener datos del usuario y sus documentos
-    const user = await usersRepository.getUserData(req.user.email);
+    const user = await UsersRepository.getUserData(req.user.email);
     if (!user) {
       res.sendNotFound("Usuario no encontrado");
     }
@@ -147,7 +147,7 @@ const updateDocuments = async (req, res) => {
 
     req.logger.info(uniqueDocuments);
 
-    const userUpdated = await usersRepository.updateUser(req.user.email, {
+    const userUpdated = await UsersRepository.updateUser(req.user.email, {
       documents: [...uniqueDocuments],
     });
 
@@ -192,7 +192,7 @@ const checkAndSend = async (req, res) => {
       return res.sendClientError("Incomplete values");
     }
 
-    const user = await usersRepository.getUser(email);
+    const user = await UsersRepository.getUser(email);
 
     if (!user) {
       return res.sendClientError("User not found");
@@ -231,7 +231,7 @@ const updatePassword = async (req, res) => {
       req.logger.error("Token expired");
       res.sendUnauthorized("Token expired");
     }
-    const dbUser = await usersRepository.getUser(user.email);
+    const dbUser = await UsersRepository.getUser(user.email);
     req.logger.debug(dbUser);
     if (!dbUser) res.sendNotFound("User not found");
     const isNew = isValidPassword(password, dbUser.password);
@@ -244,7 +244,7 @@ const updatePassword = async (req, res) => {
       );
     }
     const newPassword = createHash(password);
-    await usersRepository.updateUser(dbUser.email, { password: newPassword });
+    await UsersRepository.updateUser(dbUser.email, { password: newPassword });
     res.sendSuccess("Contraseña actualizada con exito");
   } catch (error) {
     req.logger.error(error.message);
@@ -257,7 +257,7 @@ const updateUser = async (req, res) => {
   try {
     const { email, role } = req.body;
     if (!email || !role) res.sendClientError("No user found");
-    const user = await usersRepository.updateUser(email, { role: role });
+    const user = await UsersRepository.updateUser(email, { role: role });
     res.sendSuccess(user);
   } catch (error) {
     req.logger.error(error.message);
@@ -268,7 +268,7 @@ const updateUser = async (req, res) => {
 // Get all users
 const getAllUsers = async (req, res) => {
   try {
-    const allUsers = await usersRepository.getAllUsers();
+    const allUsers = await UsersRepository.getAllUsers();
 
     if (!allUsers) {
       return res.sendClientError("No Users found");
@@ -287,7 +287,7 @@ const deleteNoActive = async (req, res) => {
   session.startTransaction();
 
   try {
-    const oldUsers = await usersRepository.getOldUsers();
+    const oldUsers = await UsersRepository.getOldUsers();
 
     if (oldUsers.length === 0) {
       res.sendSuccess("No se encontraron usuarios inactivos.");
@@ -302,7 +302,7 @@ const deleteNoActive = async (req, res) => {
       };
 
       await sendEmail(accountDeleted);
-      await usersRepository.deleteUser(user.email);
+      await UsersRepository.deleteUser(user.email);
       return;
     });
     await Promise.all(emailPromises);
@@ -327,7 +327,7 @@ const deleteUser = async (req, res) => {
   try {
     const { email } = req.params;
     if (!email) res.sendNotFound("No user found");
-    const user = await usersRepository.deleteUser(email);
+    const user = await UsersRepository.deleteUser(email);
     res.sendSuccess(user);
   } catch (error) {
     req.logger.error(error.message);
@@ -340,7 +340,7 @@ const getCartByEmail = async (req, res) => {
   try {
     const user = req.user;
     if (!user) res.sendNotFound("No user found");
-    const userData = await usersRepository.getUserData(user.email);
+    const userData = await UsersRepository.getUserData(user.email);
     res.sendSuccess(userData.cart_id);
   } catch (error) {
     req.logger.error(error.message);

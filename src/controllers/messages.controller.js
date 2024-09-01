@@ -1,9 +1,8 @@
-import { messagesRepository } from "../repositories/factoryRepository.js";
-
+import MessagesRepository from "../reositories/messages.repository.js";
 // Get all messages 
 const getAll = async (req, res) => {
   try {
-    const result = await messagesRepository.getAll();
+    const result = await MessagesRepository.getAll();
     res.sendSuccess(result);
   } catch (error) {
     res.sendServerError("Message Error", error.message);
@@ -19,7 +18,7 @@ const saveMessage = async (req, res) => {
       return res.sendClientError("No message received");
     }
     const data = { user: name, message };
-    const result = await messagesRepository.saveMessage(data);
+    const result = await MessagesRepository.saveMessage(data);
     res.sendSuccess(result);
   } catch (error) {
     res.sendServerError("Error Controller Message" + error.message);
