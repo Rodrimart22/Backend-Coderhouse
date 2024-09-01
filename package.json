@@ -3,9 +3,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js",
-    "test": "mocha --recursive"
+    "start": "node src/app.js"
   },
   "keywords": [],
   "author": "",
