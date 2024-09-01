@@ -1,4 +1,4 @@
-import MessagesRepository from "../reositories/messages.repository.js";
+import MessagesRepository from "../repositories/messages.repository.js";
 // Get all messages 
 const getAll = async (req, res) => {
   try {
