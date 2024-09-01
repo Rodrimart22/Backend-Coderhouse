@@ -1,7 +1,7 @@
 // importar dependencia de uuid
 import { v4 as uuidv4 } from "uuid";
 
-import { TicketRepository } from "../repositories/tickets.Repository.js";
+import { TicketsRepository } from "../repositories/tickets.Repository.js";
 
 const generatePurchase = async (user, amount) => {
   const newTicket = {
@@ -12,7 +12,7 @@ const generatePurchase = async (user, amount) => {
   };
 
   //usar el ticketRepository para guardad el ticket generado
-  return await TicketRepository.save(newTicket);
+  return await TicketsRepository.save(newTicket);
 };
 
 export { generatePurchase };
