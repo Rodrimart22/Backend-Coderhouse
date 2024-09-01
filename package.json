@@ -5,8 +5,7 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
-    "test": "mocha --recursive",
-    "build": "npm run build"
+    "test": "mocha --recursive"
   },
   "keywords": [],
   "author": "",
@@ -28,7 +27,6 @@
     "mongoose-paginate-v2": "^1.7.4",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.8",
-    "nodemon": "^3.1.4",
     "on-finished": "^2.4.1",
     "parseurl": "^1.3.3",
     "passport": "^0.6.0",
