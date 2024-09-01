@@ -8,7 +8,7 @@ import { registerUser } from "../service/users.service.js";
 import EErrors from "../middlewares/errors/enums.js";
 import CustomError from "../middlewares/errors/CustomError.js";
 
-import UsersRepository from "../users.repository.js";
+import UsersRepository from "../repositories/users.repository.js";
 import { sendEmail } from "../service/mail.service.js";
 import { changePasswordHtml } from "../utils/changePassword.html.js";
 import { accountDeletedHtml } from "../utils/accountDeleted.html.js";
